@@ -1,0 +1,330 @@
+import type { PublicQuestion, PublicQuestionnaire } from "@/lib/types";
+
+export const defaultQuestions: PublicQuestion[] = [
+  {
+    id: "need",
+    key: "business_need",
+    type: "multi_choice",
+    label: {
+      en: "What would help your business most right now?",
+      hi: "Abhi business ko sabse zyada kis help ki zaroorat hai?",
+      gu: "Havay business ne sauthi vadhu kai help joiye chhe?",
+    },
+    helpText: {
+      en: "Choose up to 3. It’s okay if you’re not sure.",
+      hi: "Maximum 3 choose karo. Sure nahi ho toh bhi okay.",
+      gu: "Maximum 3 choose karo. Sure na hoy to pan okay.",
+    },
+    placeholder: { en: "", hi: "", gu: "" },
+    required: true,
+    position: 1,
+    options: [
+      {
+        id: "more_enquiries",
+        label: {
+          en: "More calls & WhatsApp enquiries",
+          hi: "Zyada calls aur WhatsApp enquiries",
+          gu: "Vadhu calls ane WhatsApp enquiries",
+        },
+        description: {
+          en: "For services, shops, property, education and more",
+          hi: "Services, shops, property, education aur more",
+          gu: "Services, shops, property, education ane more",
+        },
+      },
+      {
+        id: "more_online_sales",
+        label: {
+          en: "More online product orders",
+          hi: "Zyada online product orders",
+          gu: "Vadhu online product orders",
+        },
+        description: {
+          en: "Sell products through ads and your online store",
+          hi: "Ads aur online store se products sell karo",
+          gu: "Ads ane online store thi products sell karo",
+        },
+      },
+      {
+        id: "google_visibility",
+        label: {
+          en: "Show up higher on Google",
+          hi: "Google par upar dikhai dena",
+          gu: "Google par upar dekhavu",
+        },
+        description: {
+          en: "Help nearby and relevant customers find you",
+          hi: "Nearby aur relevant customers aapko find karein",
+          gu: "Nearby ane relevant customers tamne find kare",
+        },
+      },
+      {
+        id: "creative_content",
+        label: {
+          en: "Better product photos, posts & videos",
+          hi: "Better product photos, posts aur videos",
+          gu: "Better product photos, posts ane videos",
+        },
+        description: {
+          en: "Social posts, product-page images, UGC and showcase videos",
+          hi: "Social posts, product-page images, UGC aur showcase videos",
+          gu: "Social posts, product-page images, UGC ane showcase videos",
+        },
+      },
+      {
+        id: "shopify_store",
+        label: {
+          en: "Build or improve an online shop",
+          hi: "Online shop banana ya improve karna",
+          gu: "Online shop banavvi ke improve karvi",
+        },
+        description: {
+          en: "A fast, easy-to-use Shopify website",
+          hi: "Fast aur easy-to-use Shopify website",
+          gu: "Fast ane easy-to-use Shopify website",
+        },
+      },
+      {
+        id: "need_guidance",
+        label: {
+          en: "Not sure — please guide me",
+          hi: "Sure nahi — please guide me",
+          gu: "Sure nathi — please guide karo",
+        },
+        description: {
+          en: "Tell us your problem and we’ll suggest the right path",
+          hi: "Problem batao, hum sahi path suggest karenge",
+          gu: "Problem janavo, ame sacho path suggest karishu",
+        },
+      },
+    ],
+    config: { minSelections: 1, maxSelections: 3 },
+    isActive: true,
+  },
+  {
+    id: "business-type",
+    key: "business_type",
+    type: "single_choice",
+    label: {
+      en: "What kind of business do you run?",
+      hi: "Aap kis type ka business chalate hain?",
+      gu: "Tamaru business kaya type nu chhe?",
+    },
+    helpText: {
+      en: "Pick the closest match.",
+      hi: "Jo sabse close ho woh choose karo.",
+      gu: "Je sauthi close hoy te choose karo.",
+    },
+    placeholder: { en: "", hi: "", gu: "" },
+    required: true,
+    position: 2,
+    options: [
+      {
+        id: "products",
+        label: {
+          en: "I sell products",
+          hi: "Main products sell karta/karti hoon",
+          gu: "Hu products sell karu chhu",
+        },
+        description: {
+          en: "Clothing, jewellery, food, manufacturing, etc.",
+          hi: "Clothing, jewellery, food, manufacturing, etc.",
+          gu: "Clothing, jewellery, food, manufacturing, etc.",
+        },
+      },
+      {
+        id: "services",
+        label: {
+          en: "I provide a service",
+          hi: "Main service provide karta/karti hoon",
+          gu: "Hu service provide karu chhu",
+        },
+        description: {
+          en: "Consulting, clinic, education, property, salon, etc.",
+          hi: "Consulting, clinic, education, property, salon, etc.",
+          gu: "Consulting, clinic, education, property, salon, etc.",
+        },
+      },
+      {
+        id: "local_store",
+        label: {
+          en: "I run a shop or local business",
+          hi: "Meri shop ya local business hai",
+          gu: "Mari shop ke local business chhe",
+        },
+        description: {
+          en: "Retail shop, restaurant, showroom, distributor, etc.",
+          hi: "Retail shop, restaurant, showroom, distributor, etc.",
+          gu: "Retail shop, restaurant, showroom, distributor, etc.",
+        },
+      },
+      {
+        id: "other",
+        label: { en: "Something else", hi: "Kuch aur", gu: "Kaink biju" },
+        description: {
+          en: "No problem—we’ll understand it on the call",
+          hi: "No problem—call par samajh lenge",
+          gu: "No problem—call par samajhi laishu",
+        },
+      },
+    ],
+    config: {},
+    isActive: true,
+  },
+  {
+    id: "stage",
+    key: "business_stage",
+    type: "single_choice",
+    label: {
+      en: "Where is your business today?",
+      hi: "Aaj business kis stage par hai?",
+      gu: "Aaje business kai stage par chhe?",
+    },
+    helpText: { en: "", hi: "", gu: "" },
+    placeholder: { en: "", hi: "", gu: "" },
+    required: true,
+    position: 3,
+    options: [
+      {
+        id: "starting",
+        label: { en: "Just starting", hi: "Abhi start kar raha/rahi hoon", gu: "Havay start karu chhu" },
+      },
+      {
+        id: "running_slow",
+        label: { en: "Running, but growth is slow", hi: "Running hai, growth slow hai", gu: "Running chhe, growth slow chhe" },
+      },
+      {
+        id: "ready_to_scale",
+        label: { en: "Doing well and ready to grow", hi: "Achha chal raha hai, grow karna hai", gu: "Saru chale chhe, have grow karvu chhe" },
+      },
+    ],
+    config: {},
+    isActive: true,
+  },
+  {
+    id: "budget",
+    key: "monthly_budget",
+    type: "single_choice",
+    label: {
+      en: "What monthly amount feels comfortable for growth?",
+      hi: "Growth ke liye monthly kitna amount comfortable hai?",
+      gu: "Growth mate monthly ketlu amount comfortable chhe?",
+    },
+    helpText: {
+      en: "This helps us suggest something realistic. It is not a payment.",
+      hi: "Isse realistic plan suggest karne mein help milegi. Yeh payment nahi hai.",
+      gu: "Aa thi realistic plan suggest karva help malse. Aa payment nathi.",
+    },
+    placeholder: { en: "", hi: "", gu: "" },
+    required: true,
+    position: 4,
+    options: [
+      { id: "under_20k", label: { en: "Under ₹20,000", hi: "₹20,000 se kam", gu: "₹20,000 thi ochhu" } },
+      { id: "20k_50k", label: { en: "₹20,000 – ₹50,000", hi: "₹20,000 – ₹50,000", gu: "₹20,000 – ₹50,000" } },
+      { id: "50k_1l", label: { en: "₹50,000 – ₹1 lakh", hi: "₹50,000 – ₹1 lakh", gu: "₹50,000 – ₹1 lakh" } },
+      { id: "1l_plus", label: { en: "₹1 lakh or more", hi: "₹1 lakh ya zyada", gu: "₹1 lakh ke vadhu" } },
+      { id: "discuss", label: { en: "Not sure — let’s discuss", hi: "Sure nahi — discuss karte hain", gu: "Sure nathi — discuss kariye" } },
+    ],
+    config: {},
+    isActive: true,
+  },
+  {
+    id: "timeline",
+    key: "start_timeline",
+    type: "single_choice",
+    label: {
+      en: "When would you like to start?",
+      hi: "Aap kab start karna chahte hain?",
+      gu: "Tame kyare start karva mango chho?",
+    },
+    helpText: { en: "", hi: "", gu: "" },
+    placeholder: { en: "", hi: "", gu: "" },
+    required: true,
+    position: 5,
+    options: [
+      { id: "now", label: { en: "As soon as possible", hi: "Jaldi se jaldi", gu: "Jaldi thi jaldi" } },
+      { id: "month", label: { en: "Within 30 days", hi: "30 days ke andar", gu: "30 days ni andar" } },
+      { id: "later", label: { en: "Just exploring for now", hi: "Abhi sirf explore kar raha/rahi hoon", gu: "Havay fakt explore karu chhu" } },
+    ],
+    config: {},
+    isActive: true,
+  },
+  {
+    id: "name",
+    key: "full_name",
+    type: "short_text",
+    label: { en: "What should we call you?", hi: "Aapka naam kya hai?", gu: "Tamaru naam shu chhe?" },
+    helpText: { en: "", hi: "", gu: "" },
+    placeholder: { en: "Type your full name", hi: "Apna full name likho", gu: "Tamaru full name lakho" },
+    required: true,
+    position: 6,
+    options: [],
+    config: { minLength: 2, maxLength: 100 },
+    isActive: true,
+  },
+  {
+    id: "phone",
+    key: "phone",
+    type: "phone",
+    label: { en: "Your WhatsApp number?", hi: "Aapka WhatsApp number?", gu: "Tamaro WhatsApp number?" },
+    helpText: {
+      en: "We’ll only use this to discuss your enquiry.",
+      hi: "Sirf aapki enquiry discuss karne ke liye use hoga.",
+      gu: "Fakt tamari enquiry discuss karva mate use thase.",
+    },
+    placeholder: { en: "10-digit mobile number", hi: "10-digit mobile number", gu: "10-digit mobile number" },
+    required: true,
+    position: 7,
+    options: [],
+    config: {},
+    isActive: true,
+  },
+  {
+    id: "city",
+    key: "city",
+    type: "short_text",
+    label: { en: "Which city is your business in?", hi: "Business kis city mein hai?", gu: "Business kai city ma chhe?" },
+    helpText: { en: "", hi: "", gu: "" },
+    placeholder: { en: "Example: Surat", hi: "Example: Surat", gu: "Example: Surat" },
+    required: true,
+    position: 8,
+    options: [],
+    config: { minLength: 2, maxLength: 100 },
+    isActive: true,
+  },
+  {
+    id: "challenge",
+    key: "biggest_challenge",
+    type: "long_text",
+    label: {
+      en: "Anything else you want us to understand?",
+      hi: "Aur kuch jo aap humein batana chahte hain?",
+      gu: "Biju kai je tame amne janavva mango chho?",
+    },
+    helpText: {
+      en: "Optional — write in any language.",
+      hi: "Optional — kisi bhi language mein likho.",
+      gu: "Optional — koi pan language ma lakho.",
+    },
+    placeholder: {
+      en: "Example: We get enquiries but very few people buy...",
+      hi: "Example: Enquiries aati hain par buyers kam hain...",
+      gu: "Example: Enquiries ave chhe pan buyers ochha chhe...",
+    },
+    required: false,
+    position: 9,
+    options: [],
+    config: { maxLength: 1000 },
+    isActive: true,
+  },
+];
+
+export const fallbackQuestionnaire: PublicQuestionnaire = {
+  formId: "11111111-1111-4111-8111-111111111111",
+  versionId: "22222222-2222-4222-8222-222222222222",
+  slug: "growth-check",
+  name: "Global Surat Growth Check",
+  version: 1,
+  questions: defaultQuestions,
+  isFallback: true,
+};
