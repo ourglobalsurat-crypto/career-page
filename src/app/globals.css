@@ -98,8 +98,8 @@ img {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 78px;
-  padding: 8px clamp(18px, 4vw, 64px);
+  min-height: 104px;
+  padding: 10px clamp(18px, 4vw, 64px);
   background: rgba(255, 253, 248, 0.94);
   border-bottom: 1.5px solid var(--ink);
   backdrop-filter: blur(14px);
@@ -107,14 +107,16 @@ img {
 
 .brand-link {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  width: 186px;
-  height: 60px;
-  overflow: hidden;
+  width: 168px;
+  height: auto;
+  overflow: visible;
 }
 
 .brand-link img {
-  width: 180px;
+  display: block;
+  width: 100%;
   height: auto;
 }
 
@@ -190,7 +192,7 @@ img {
   gap: clamp(42px, 6vw, 94px);
   align-items: center;
   width: min(100%, 1500px);
-  min-height: calc(100vh - 78px);
+  min-height: calc(100vh - 104px);
   padding: clamp(52px, 6vw, 92px) clamp(20px, 5vw, 78px) clamp(72px, 8vw, 118px);
   margin: 0 auto;
 }
@@ -826,6 +828,12 @@ img {
   font-style: normal;
 }
 
+.marquee-strip > div > span {
+  display: inline-flex;
+  gap: 22px;
+  align-items: center;
+}
+
 .section-pad {
   padding: clamp(76px, 9vw, 132px) clamp(20px, 6vw, 92px);
 }
@@ -1200,16 +1208,17 @@ img {
 
 @media (max-width: 900px) {
   .site-header {
-    min-height: 70px;
+    min-height: 90px;
+    padding-block: 8px;
   }
 
   .brand-link {
-    width: 158px;
-    height: 54px;
+    width: 146px;
+    height: auto;
   }
 
   .brand-link img {
-    width: 154px;
+    width: 100%;
   }
 
   .header-cta {

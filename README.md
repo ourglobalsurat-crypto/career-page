@@ -1,11 +1,11 @@
 # Global Surat lead landing page
 
-A mobile-first Meta ads landing page and lead desk for Global Surat. The public experience uses plain Gujlish, Hinglish, or English and guides visitors through one large, simple question at a time. Every question is managed from the protected admin panel and stored in Neon Postgres.
+A mobile-first Meta ads landing page and lead desk for Global Surat. The public experience uses Gujarati script, Hindi script, or English—with familiar terms such as Google, WhatsApp, Ads, and Shopify kept in English—and guides visitors through one large, simple question at a time. Every question is managed from the protected admin panel and stored in Neon Postgres.
 
 ## What is included
 
 - Public landing pages at `/` and `/contact`
-- Gujlish, Hinglish, and English language switching
+- ગુજરાતી, हिन्दी, and English language switching
 - One-question-at-a-time lead form with progress, large tap targets, validation, consent, and a WhatsApp fallback
 - UTM, source, campaign, referrer, language, and questionnaire-version capture
 - Authenticated admin dashboard at `/admin`

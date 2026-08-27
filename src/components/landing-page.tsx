@@ -19,9 +19,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
-import { languageNames, languageNativeLabels, processSteps, services, siteCopy, text } from "@/lib/copy";
+import {
+  languageNames,
+  languageNativeLabels,
+  marqueeItems,
+  processSteps,
+  services,
+  siteCopy,
+  text,
+} from "@/lib/copy";
 import type { Locale, PublicQuestion, PublicQuestionnaire, QuestionOption } from "@/lib/types";
 import { validateQuestionAnswer } from "@/lib/validation";
 
@@ -33,37 +41,37 @@ const faqs = [
   {
     q: {
       en: "Do I need to understand digital marketing?",
-      hi: "Kya mujhe digital marketing samajhna zaroori hai?",
-      gu: "Shu mane digital marketing samajhvu jaruri chhe?",
+      hi: "क्या मुझे digital marketing समझना ज़रूरी है?",
+      gu: "શું મને digital marketing સમજવું જરૂરી છે?",
     },
     a: {
       en: "Not at all. Tell us what result you want in normal words. We’ll explain the useful options without jargon.",
-      hi: "Bilkul nahi. Normal words mein result batao. Useful options hum simple language mein samjhayenge.",
-      gu: "Bilkul nahi. Normal words ma result janavo. Useful options ame simple language ma samjavishu.",
+      hi: "बिल्कुल नहीं। आपको जो result चाहिए, वह आसान शब्दों में बताइए। उपयोगी options हम मुश्किल jargon के बिना समझाएँगे।",
+      gu: "બિલકુલ નહીં. તમને જે result જોઈએ તે સરળ શબ્દોમાં કહો. ઉપયોગી options અમે મુશ્કેલ jargon વગર સમજાવીશું.",
     },
   },
   {
     q: {
       en: "Is this 2-minute check free?",
-      hi: "Kya yeh 2-minute check free hai?",
-      gu: "Shu aa 2-minute check free chhe?",
+      hi: "क्या यह 2-minute check free है?",
+      gu: "શું આ 2-minute check free છે?",
     },
     a: {
       en: "Yes. Sharing your needs and the first conversation are free. We only discuss pricing after we understand the work.",
-      hi: "Haan. Need share karna aur first conversation free hai. Kaam samajhne ke baad hi pricing discuss hoti hai.",
-      gu: "Haan. Need share karvi ane first conversation free chhe. Kaam samjya pachhi j pricing discuss thase.",
+      hi: "हाँ। अपनी ज़रूरत बताना और पहली बातचीत free है। काम समझने के बाद ही pricing पर बात होगी।",
+      gu: "હા. તમારી જરૂરિયાત જણાવવી અને પહેલી વાતચીત free છે. કામ સમજ્યા પછી જ pricing વિશે વાત થશે.",
     },
   },
   {
     q: {
       en: "What happens after I submit?",
-      hi: "Submit karne ke baad kya hoga?",
-      gu: "Submit karya pachhi shu thase?",
+      hi: "Submit करने के बाद क्या होगा?",
+      gu: "Submit કર્યા પછી શું થશે?",
     },
     a: {
       en: "A person from our Surat team reviews your answers, then calls or WhatsApps you with a practical next step. There is no pressure to buy.",
-      hi: "Surat team ka ek person answers review karke practical next step ke saath call ya WhatsApp karega. Koi buying pressure nahi.",
-      gu: "Surat team no ek person answers review kari practical next step sathe call ke WhatsApp karse. Koi buying pressure nahi.",
+      hi: "हमारी सूरत team आपके जवाब देखकर उपयोगी अगले कदम के साथ call या WhatsApp करेगी। खरीदने का कोई दबाव नहीं।",
+      gu: "અમારી સુરત team તમારા જવાબ જોઈને ઉપયોગી આગળના પગલા સાથે call અથવા WhatsApp કરશે. ખરીદીનું કોઈ દબાણ નહીં.",
     },
   },
 ] as const;
@@ -180,8 +188,8 @@ function QuestionControl({
   const options =
     question.type === "yes_no" && question.options.length === 0
       ? [
-          { id: "yes", label: { en: "Yes", hi: "Haan", gu: "Haan" } },
-          { id: "no", label: { en: "No", hi: "Nahi", gu: "Na" } },
+          { id: "yes", label: { en: "Yes", hi: "हाँ", gu: "હા" } },
+          { id: "no", label: { en: "No", hi: "नहीं", gu: "ના" } },
         ]
       : question.options;
 
@@ -344,13 +352,13 @@ function GrowthCheck({
           const invalidIndex = questions.findIndex((question) => question.key === result.questionKey);
           if (invalidIndex >= 0) setStep(invalidIndex);
         }
-        setError(result.message || "We could not save your details. Please try again.");
+        setError(result.message || text(siteCopy.saveError, locale));
         return;
       }
 
       setIsComplete(true);
     } catch {
-      setError("We could not connect. Please check your internet and try again.");
+      setError(text(siteCopy.connectError, locale));
     } finally {
       setIsSubmitting(false);
     }
@@ -360,19 +368,19 @@ function GrowthCheck({
     return (
       <div className="form-success" role="status">
         <span className="success-icon"><CircleCheckBig size={40} /></span>
-        <span className="form-kicker">DONE / COMPLETE</span>
+        <span className="form-kicker">{text(siteCopy.successKicker, locale)}</span>
         <h2>{text(siteCopy.successTitle, locale)}</h2>
         <p>{text(siteCopy.successBody, locale)}</p>
         <div className="success-summary">
-          <span><Clock3 size={18} /> Human follow-up</span>
-          <span><ShieldCheck size={18} /> Your details stay private</span>
+          <span><Clock3 size={18} /> {text(siteCopy.humanFollowUp, locale)}</span>
+          <span><ShieldCheck size={18} /> {text(siteCopy.detailsPrivate, locale)}</span>
         </div>
       </div>
     );
   }
 
   if (!currentQuestion) {
-    return <p className="form-error">The questionnaire is temporarily unavailable.</p>;
+    return <p className="form-error">{text(siteCopy.formUnavailable, locale)}</p>;
   }
 
   return (
@@ -436,7 +444,7 @@ function GrowthCheck({
         </button>
         {isLast ? (
           <button className="button button-primary form-submit" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : text(siteCopy.submit, locale)} <ArrowRight size={18} />
+            {isSubmitting ? text(siteCopy.saving, locale) : text(siteCopy.submit, locale)} <ArrowRight size={18} />
           </button>
         ) : (
           <button className="button button-primary" type="button" onClick={nextStep}>
@@ -444,7 +452,7 @@ function GrowthCheck({
           </button>
         )}
       </div>
-      <p className="privacy-note"><ShieldCheck size={15} /> Private & secure. Your details are never sold.</p>
+      <p className="privacy-note"><ShieldCheck size={15} /> {text(siteCopy.privacyNote, locale)}</p>
     </form>
   );
 }
@@ -458,6 +466,10 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
     cta: text(siteCopy.primaryCta, locale),
   }), [locale]);
 
+  useEffect(() => {
+    document.documentElement.lang = locale === "gu" ? "gu-IN" : locale === "hi" ? "hi-IN" : "en-IN";
+  }, [locale]);
+
   function scrollToForm() {
     document.getElementById("growth-check")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -466,7 +478,14 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
     <main className="site-shell">
       <header className="site-header">
         <a href="#top" className="brand-link" aria-label="Global Surat home">
-          <Image src="/assets/global-surat-logo.png" alt="Global Surat" width={212} height={113} priority />
+          <Image
+            src="/assets/global-surat-logo.png"
+            alt="Global Surat"
+            width={212}
+            height={113}
+            sizes="(max-width: 900px) 146px, 168px"
+            priority
+          />
         </a>
         <div className="header-actions">
           <div className="language-switch" role="group" aria-label="Choose page language">
@@ -496,7 +515,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
               {activeCopy.cta} <ArrowRight size={20} />
             </button>
             <a className="text-link" href={whatsappHref} target={whatsappNumber ? "_blank" : undefined} rel="noreferrer">
-              <MessageCircle size={19} /> WhatsApp us
+              <MessageCircle size={19} /> {text(siteCopy.whatsappCta, locale)}
             </a>
           </div>
           <div className="trust-row" aria-label="Why people choose this check">
@@ -506,7 +525,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
           </div>
           <div className="language-note">
             <strong>{languageNativeLabels[locale]}</strong>
-            <span>ma vaat kari shakay chhe / available</span>
+            <span>{text(siteCopy.languageAvailability, locale)}</span>
           </div>
         </div>
 
@@ -527,7 +546,9 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
 
       <section className="marquee-strip" aria-label="Global Surat service outcomes">
         <div>
-          <span>MORE ENQUIRIES</span><i>✦</i><span>ONLINE SALES</span><i>✦</i><span>BETTER CREATIVE</span><i>✦</i><span>SHOPIFY STORES</span><i>✦</i><span>GOOGLE VISIBILITY</span>
+          {marqueeItems.map((item, index) => (
+            <span key={item.en}>{text(item, locale)}{index < marqueeItems.length - 1 && <i>✦</i>}</span>
+          ))}
         </div>
       </section>
 
@@ -535,7 +556,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
         <div className="section-heading">
           <span className="eyebrow dark">{text(siteCopy.servicesEyebrow, locale)}</span>
           <h2>{text(siteCopy.servicesTitle, locale)}</h2>
-          <p>Simple outcomes first. The right tools come after we understand your business.</p>
+          <p>{text(siteCopy.servicesIntro, locale)}</p>
         </div>
         <div className="services-grid">
           {services.map((service, index) => {
@@ -554,7 +575,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
 
       <section className="team-section section-pad">
         <div className="team-copy">
-          <span className="eyebrow"><MapPin size={15} /> LOCAL. HUMAN. ACCOUNTABLE.</span>
+          <span className="eyebrow"><MapPin size={15} /> {text(siteCopy.teamEyebrow, locale)}</span>
           <h2>{text(siteCopy.teamTitle, locale)}</h2>
           <p>{text(siteCopy.teamBody, locale)}</p>
           <button className="button button-light" type="button" onClick={scrollToForm}>
@@ -569,13 +590,13 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
             height={1080}
             sizes="(max-width: 900px) 100vw, 58vw"
           />
-          <figcaption><span>OUR TEAM</span><strong>Surat, Gujarat</strong></figcaption>
+          <figcaption><span>{text(siteCopy.teamPhotoLabel, locale)}</span><strong>Surat, Gujarat</strong></figcaption>
         </figure>
       </section>
 
       <section className="process-section section-pad">
         <div className="section-heading light">
-          <span className="eyebrow">HOW IT WORKS</span>
+          <span className="eyebrow">{text(siteCopy.processEyebrow, locale)}</span>
           <h2>{text(siteCopy.processTitle, locale)}</h2>
         </div>
         <div className="process-grid">
@@ -591,8 +612,8 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
 
       <section className="faq-section section-pad">
         <div className="section-heading compact">
-          <span className="eyebrow dark">GOOD TO KNOW</span>
-          <h2>Simple answers before we talk.</h2>
+          <span className="eyebrow dark">{text(siteCopy.faqEyebrow, locale)}</span>
+          <h2>{text(siteCopy.faqTitle, locale)}</h2>
         </div>
         <div className="faq-list">
           {faqs.map((faq, index) => (
@@ -606,7 +627,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
 
       <section className="final-cta section-pad">
         <div>
-          <span className="eyebrow">NO PRESSURE. JUST A CLEAR NEXT STEP.</span>
+          <span className="eyebrow">{text(siteCopy.finalEyebrow, locale)}</span>
           <h2>{text(siteCopy.finalTitle, locale)}</h2>
         </div>
         <button className="button button-light button-large" type="button" onClick={scrollToForm}>
@@ -616,7 +637,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
 
       <footer className="site-footer">
         <Image src="/assets/global-surat-logo.png" alt="Global Surat" width={175} height={93} />
-        <p>Simple growth support for ambitious businesses.</p>
+        <p>{text(siteCopy.footerBody, locale)}</p>
         <div><span>© {new Date().getFullYear()} Global Surat</span><a href="/admin/login">Admin</a></div>
       </footer>
 

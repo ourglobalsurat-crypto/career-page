@@ -36,37 +36,50 @@ try {
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   assert((await page.title()).includes("Global Surat"), "Landing page title is incorrect.");
-  assert(await page.getByRole("heading", { name: /Business ma vadhu/ }).isVisible(), "Gujlish hero heading is not visible.");
-  assert(await page.getByRole("heading", { name: /Havay business ne sauthi vadhu/ }).isVisible(), "First questionnaire step is not visible above the fold.");
+  assert(await page.getByRole("heading", { name: /તમારા બિઝનેસ માટે વધુ/ }).isVisible(), "Gujarati hero heading is not visible.");
+  assert(await page.getByRole("heading", { name: /અત્યારે તમારા બિઝનેસને/ }).isVisible(), "Gujarati questionnaire is not visible above the fold.");
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Desktop page has horizontal overflow.");
+  assert(await page.evaluate(() => {
+    const header = document.querySelector(".site-header")?.getBoundingClientRect();
+    const logo = document.querySelector(".brand-link img")?.getBoundingClientRect();
+    return Boolean(header && logo && logo.top >= header.top && logo.bottom <= header.bottom);
+  }), "Desktop logo is clipped by the navbar.");
+  await page.screenshot({ path: path.join(outputDir, "landing-header-desktop.png"), fullPage: false });
   await page.screenshot({ path: path.join(outputDir, "landing-desktop.png"), fullPage: true });
 
-  await page.getByRole("button", { name: /Vadhu calls ane WhatsApp enquiries/ }).click();
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
-  await page.getByRole("radio", { name: /Hu service provide karu chhu/ }).click();
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
-  await page.getByRole("radio", { name: /Running chhe, growth slow chhe/ }).click();
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
+  await page.getByRole("button", { name: "हिन्दी" }).click();
+  assert(await page.getByRole("heading", { name: /अपने बिज़नेस के लिए ज़्यादा/ }).isVisible(), "Hindi hero heading is not visible.");
+  assert(await page.getByRole("heading", { name: /अभी आपके बिज़नेस को/ }).isVisible(), "Hindi questionnaire is not visible.");
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Hindi page has horizontal overflow.");
+  await page.screenshot({ path: path.join(outputDir, "landing-hindi.png"), fullPage: false });
+
+  await page.getByRole("button", { name: "English" }).click();
+  await page.getByRole("button", { name: /More calls & WhatsApp enquiries/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("radio", { name: /I provide a service/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("radio", { name: /Running, but growth is slow/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("radio", { name: "₹20,000 – ₹50,000" }).click();
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
-  await page.getByRole("radio", { name: "30 days ni andar" }).click();
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
-  await page.getByPlaceholder("Tamaru full name lakho").fill("QA Test Lead");
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("radio", { name: "Within 30 days" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByPlaceholder("Type your full name").fill("QA Test Lead");
+  await page.getByRole("button", { name: "Continue" }).click();
   await page.getByPlaceholder("10-digit mobile number").fill("9876543210");
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
   await page.getByPlaceholder("Example: Surat").fill("Surat");
-  await page.getByRole("button", { name: "Aagal vadho" }).click();
-  await page.getByPlaceholder(/Enquiries ave chhe/).fill("Automated end-to-end QA submission.");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByPlaceholder(/We get enquiries/).fill("Automated end-to-end QA submission.");
   await page.locator(".consent-row input").check();
 
   const leadResponsePromise = page.waitForResponse((response) => response.url().endsWith("/api/leads") && response.request().method() === "POST");
-  await page.getByRole("button", { name: /Mari details moklo/ }).click();
+  await page.getByRole("button", { name: /Send my details/ }).click();
   const leadResponse = await leadResponsePromise;
   const leadResult = await leadResponse.json();
   assert(leadResponse.status() === 201 && leadResult.ok, `Lead submission failed with ${leadResponse.status()}.`);
   createdLeadId = leadResult.leadId;
-  await page.getByRole("heading", { name: /details mali gayi/ }).waitFor();
+  await page.getByRole("heading", { name: /we’ve got it/ }).waitFor();
   await page.screenshot({ path: path.join(outputDir, "landing-success.png"), fullPage: false });
 
   await page.goto(`${baseUrl}/admin/login`, { waitUntil: "networkidle" });
@@ -114,6 +127,12 @@ try {
     return { form, copy };
   });
   assert(mobileOrder.form < mobileOrder.copy, "Mobile form is not placed before the long hero copy.");
+  assert(await mobile.evaluate(() => {
+    const header = document.querySelector(".site-header")?.getBoundingClientRect();
+    const logo = document.querySelector(".brand-link img")?.getBoundingClientRect();
+    return Boolean(header && logo && logo.top >= header.top && logo.bottom <= header.bottom);
+  }), "Mobile logo is clipped by the navbar.");
+  await mobile.screenshot({ path: path.join(outputDir, "landing-header-mobile.png"), fullPage: false });
   await mobile.screenshot({ path: path.join(outputDir, "landing-mobile-390.png"), fullPage: true });
   await mobileContext.close();
 

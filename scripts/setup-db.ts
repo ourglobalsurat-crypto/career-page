@@ -208,7 +208,7 @@ async function main() {
 
   console.log("Neon database is ready.");
   console.log(`Admin account: ${adminEmail}`);
-  console.log(`Seeded ${defaultQuestions.length} editable questions in English, Hinglish and Gujlish.`);
+  console.log(`Seeded ${defaultQuestions.length} editable questions in English, Hindi and Gujarati.`);
 }
 
 main().catch((error) => {

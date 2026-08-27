@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "db:setup": "tsx scripts/setup-db.ts",
+    "db:publish-language-update": "tsx scripts/publish-language-update.ts",
     "qa:e2e": "node scripts/qa.mjs"
   },
   "dependencies": {
