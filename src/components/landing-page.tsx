@@ -7,6 +7,7 @@ import {
   ChevronDown,
   CircleCheckBig,
   Clock3,
+  ExternalLink,
   Images,
   MapPin,
   Megaphone,
@@ -36,6 +37,7 @@ import { validateQuestionAnswer } from "@/lib/validation";
 type AnswerMap = Record<string, unknown>;
 
 const serviceIcons: LucideIcon[] = [Megaphone, ShoppingBag, Images, Store, Search];
+const MAIN_WEBSITE_URL = "https://globalsurat.com/";
 
 const faqs = [
   {
@@ -395,7 +397,7 @@ function GrowthCheck({
 
       <div className="form-language-mobile" aria-label="Choose language">
         {(["gu", "hi", "en"] as Locale[]).map((item) => (
-          <button key={item} type="button" className={locale === item ? "active" : ""} onClick={() => onLocaleChange(item)}>
+          <button key={item} type="button" aria-pressed={locale === item} className={locale === item ? "active" : ""} onClick={() => onLocaleChange(item)}>
             {languageNames[item]}
           </button>
         ))}
@@ -470,8 +472,23 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
     document.documentElement.lang = locale === "gu" ? "gu-IN" : locale === "hi" ? "hi-IN" : "en-IN";
   }, [locale]);
 
-  function scrollToForm() {
-    document.getElementById("growth-check")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  function startGrowthCheck() {
+    const formSection = document.getElementById("growth-check");
+    if (!formSection) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    formSection.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+
+    window.setTimeout(() => {
+      formSection
+        .querySelector<HTMLElement>(
+          ".choice-card:not(:disabled), .question-input, .rating-option:not(:disabled)",
+        )
+        ?.focus({ preventScroll: true });
+    }, reduceMotion ? 0 : 350);
   }
 
   return (
@@ -488,6 +505,15 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
           />
         </a>
         <div className="header-actions">
+          <a
+            className="header-main-site"
+            href={MAIN_WEBSITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${text(siteCopy.mainWebsite, locale)} (opens in a new tab)`}
+          >
+            {text(siteCopy.mainWebsite, locale)} <ExternalLink size={14} />
+          </a>
           <div className="language-switch" role="group" aria-label="Choose page language">
             {(["gu", "hi", "en"] as Locale[]).map((item) => (
               <button key={item} type="button" aria-pressed={locale === item} className={locale === item ? "active" : ""} onClick={() => setLocale(item)}>
@@ -495,7 +521,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
               </button>
             ))}
           </div>
-          <button className="header-cta" type="button" onClick={scrollToForm}>
+          <button className="header-cta" type="button" onClick={startGrowthCheck} aria-controls="growth-check" data-cta-location="navbar">
             {text(siteCopy.navCta, locale)} <ArrowRight size={16} />
           </button>
         </div>
@@ -511,12 +537,18 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
           </h1>
           <p className="hero-description">{activeCopy.body}</p>
           <div className="hero-actions">
-            <button className="button button-primary button-large" type="button" onClick={scrollToForm}>
+            <button className="button button-primary button-large" type="button" onClick={startGrowthCheck} aria-controls="growth-check" data-cta-location="hero">
               {activeCopy.cta} <ArrowRight size={20} />
             </button>
-            <a className="text-link" href={whatsappHref} target={whatsappNumber ? "_blank" : undefined} rel="noreferrer">
-              <MessageCircle size={19} /> {text(siteCopy.whatsappCta, locale)}
-            </a>
+            {whatsappNumber ? (
+              <a className="text-link" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <MessageCircle size={19} /> {text(siteCopy.whatsappCta, locale)}
+              </a>
+            ) : (
+              <button className="text-link" type="button" onClick={startGrowthCheck} aria-controls="growth-check">
+                <MessageCircle size={19} /> {text(siteCopy.whatsappCta, locale)}
+              </button>
+            )}
           </div>
           <div className="trust-row" aria-label="Why people choose this check">
             <span><Check size={15} /> {text(siteCopy.noJargon, locale)}</span>
@@ -545,9 +577,14 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
       </section>
 
       <section className="marquee-strip" aria-label="Global Surat service outcomes">
-        <div>
-          {marqueeItems.map((item, index) => (
-            <span key={item.en}>{text(item, locale)}{index < marqueeItems.length - 1 && <i>✦</i>}</span>
+        <span className="sr-only">{marqueeItems.map((item) => text(item, locale)).join(" · ")}</span>
+        <div className="marquee-track" aria-hidden="true">
+          {[0, 1].map((copyIndex) => (
+            <div className="marquee-group" key={copyIndex}>
+              {marqueeItems.map((item) => (
+                <span key={`${copyIndex}-${item.en}`}>{text(item, locale)} <i>✦</i></span>
+              ))}
+            </div>
           ))}
         </div>
       </section>
@@ -578,9 +615,15 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
           <span className="eyebrow"><MapPin size={15} /> {text(siteCopy.teamEyebrow, locale)}</span>
           <h2>{text(siteCopy.teamTitle, locale)}</h2>
           <p>{text(siteCopy.teamBody, locale)}</p>
-          <button className="button button-light" type="button" onClick={scrollToForm}>
-            {text(siteCopy.primaryCta, locale)} <ArrowRight size={19} />
-          </button>
+          <a
+            className="button button-light"
+            href={MAIN_WEBSITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${text(siteCopy.mainWebsite, locale)} (opens in a new tab)`}
+          >
+            {text(siteCopy.mainWebsite, locale)} <ExternalLink size={18} />
+          </a>
         </div>
         <figure className="team-photo-wrap">
           <Image
@@ -630,18 +673,24 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
           <span className="eyebrow">{text(siteCopy.finalEyebrow, locale)}</span>
           <h2>{text(siteCopy.finalTitle, locale)}</h2>
         </div>
-        <button className="button button-light button-large" type="button" onClick={scrollToForm}>
+        <button className="button button-light button-large" type="button" onClick={startGrowthCheck} aria-controls="growth-check" data-cta-location="final">
           {text(siteCopy.primaryCta, locale)} <ArrowRight size={21} />
         </button>
       </section>
 
       <footer className="site-footer">
-        <Image src="/assets/global-surat-logo.png" alt="Global Surat" width={175} height={93} />
+        <a href={MAIN_WEBSITE_URL} target="_blank" rel="noopener noreferrer" aria-label="Visit the Global Surat main website (opens in a new tab)">
+          <Image src="/assets/global-surat-logo.png" alt="Global Surat" width={175} height={93} />
+        </a>
         <p>{text(siteCopy.footerBody, locale)}</p>
-        <div><span>© {new Date().getFullYear()} Global Surat</span><a href="/admin/login">Admin</a></div>
+        <div>
+          <span>© {new Date().getFullYear()} Global Surat</span>
+          <a href={MAIN_WEBSITE_URL} target="_blank" rel="noopener noreferrer">{text(siteCopy.websiteShort, locale)} ↗</a>
+          <a href="/admin/login">Admin</a>
+        </div>
       </footer>
 
-      <button className="mobile-sticky-cta" type="button" onClick={scrollToForm}>
+      <button className="mobile-sticky-cta" type="button" onClick={startGrowthCheck} aria-controls="growth-check" data-cta-location="mobile-sticky">
         {text(siteCopy.primaryCta, locale)} <ArrowRight size={18} />
       </button>
     </main>

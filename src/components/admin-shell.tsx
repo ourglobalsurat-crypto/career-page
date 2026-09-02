@@ -70,7 +70,7 @@ export function AdminShell({
           })}
         </nav>
         <div className="admin-sidebar-bottom">
-          <a href="/" target="_blank" rel="noreferrer"><ExternalLink size={17} /> View landing page</a>
+          <a href="/contact" target="_blank" rel="noopener noreferrer"><ExternalLink size={17} /> View landing page</a>
           <div className="admin-account">
             <span>{adminEmail.slice(0, 1).toUpperCase()}</span>
             <div><strong>{adminEmail}</strong><small>Administrator</small></div>

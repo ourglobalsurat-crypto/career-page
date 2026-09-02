@@ -22,6 +22,16 @@ export const siteCopy = {
     hi: "अपना free plan पाएँ",
     gu: "મારો free plan મેળવો",
   },
+  mainWebsite: {
+    en: "Visit our main website",
+    hi: "Main website देखें",
+    gu: "Main website જુઓ",
+  },
+  websiteShort: {
+    en: "Website",
+    hi: "Website",
+    gu: "Website",
+  },
   eyebrow: {
     en: "SURAT-BASED GROWTH TEAM",
     hi: "सूरत की बिज़नेस ग्रोथ टीम",

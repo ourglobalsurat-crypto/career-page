@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Manrope } from "next/font/google";
+import {
+  DM_Serif_Display,
+  Manrope,
+  Noto_Sans_Devanagari,
+  Noto_Sans_Gujarati,
+} from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -12,6 +17,18 @@ const display = DM_Serif_Display({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-display",
+  display: "swap",
+});
+
+const gujarati = Noto_Sans_Gujarati({
+  subsets: ["gujarati"],
+  variable: "--font-gujarati",
+  display: "swap",
+});
+
+const devanagari = Noto_Sans_Devanagari({
+  subsets: ["devanagari"],
+  variable: "--font-devanagari",
   display: "swap",
 });
 
@@ -52,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="gu-IN"
-      className={`${manrope.variable} ${display.variable}`}
+      className={`${manrope.variable} ${display.variable} ${gujarati.variable} ${devanagari.variable}`}
       data-scroll-behavior="smooth"
     >
       <body>{children}</body>

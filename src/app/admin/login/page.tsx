@@ -26,7 +26,7 @@ export default async function AdminLoginPage() {
         </div>
       </section>
       <section className="admin-login-panel">
-        <Link className="admin-login-logo" href="/" aria-label="Back to landing page"><Image src="/assets/global-surat-logo.png" alt="Global Surat" width={190} height={102} priority /></Link>
+        <Link className="admin-login-logo" href="/contact" aria-label="Back to landing page"><Image src="/assets/global-surat-logo.png" alt="Global Surat" width={190} height={102} priority /></Link>
         <div className="admin-login-card">
           <span className="admin-page-kicker">PRIVATE ADMIN AREA</span>
           <h1>Welcome back.</h1>

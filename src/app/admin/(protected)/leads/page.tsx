@@ -33,7 +33,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           <table className="admin-table leads-table">
             <thead><tr><th>Lead</th><th>Phone / email</th><th>City</th><th>Source</th><th>Received</th><th>Status</th><th /></tr></thead>
             <tbody>
-              {leads.map((lead) => <tr key={lead.id}><td><strong>{lead.name || "Unnamed lead"}</strong><small>{lead.language.toUpperCase()} response</small></td><td><strong>{lead.phone || "—"}</strong><small>{lead.email || ""}</small></td><td>{lead.city || "—"}</td><td><span className="source-pill">{lead.source || "direct"}</span></td><td>{formatDate(lead.createdAt)}</td><td><LeadStatusControl id={lead.id} initialStatus={lead.status} /></td><td><Link className="table-arrow" href={`/admin/leads/${lead.id}`}><ArrowRight size={16} /></Link></td></tr>)}
+              {leads.map((lead) => <tr key={lead.id}><td><strong>{lead.name || "Unnamed lead"}</strong><small>{lead.language.toUpperCase()} response</small></td><td><strong>{lead.phone || "—"}</strong><small>{lead.email || ""}</small></td><td>{lead.city || "—"}</td><td><span className="source-pill">{lead.source || "direct"}</span></td><td>{formatDate(lead.createdAt)}</td><td><LeadStatusControl id={lead.id} initialStatus={lead.status} /></td><td><Link className="table-arrow" href={`/admin/leads/${lead.id}`} aria-label={`View details for ${lead.name || "lead"}`}><ArrowRight size={16} /></Link></td></tr>)}
               {!leads.length && <tr><td colSpan={7} className="empty-table"><Users size={24} /> No leads match these filters.</td></tr>}
             </tbody>
           </table>

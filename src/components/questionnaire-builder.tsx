@@ -212,7 +212,7 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
           <p>Edits stay private until you publish. Old lead answers keep their original question text.</p>
         </div>
         <div>
-          <a className="admin-button secondary" href="/?preview=public" target="_blank" rel="noreferrer"><Eye size={17} /> View live form</a>
+          <a className="admin-button secondary" href="/contact" target="_blank" rel="noopener noreferrer"><Eye size={17} /> View published form</a>
           <button className="admin-button secondary" type="button" onClick={() => openEditor()}><Plus size={17} /> Add question</button>
           <button className="admin-button primary" type="button" onClick={publish} disabled={isPublishing || questions.length === 0}><Rocket size={17} /> {isPublishing ? "Publishing..." : "Publish changes"}</button>
         </div>
