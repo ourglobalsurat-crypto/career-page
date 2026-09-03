@@ -5,8 +5,6 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
-  CircleCheckBig,
-  Clock3,
   ExternalLink,
   Images,
   MapPin,
@@ -32,6 +30,12 @@ import {
   text,
 } from "@/lib/copy";
 import {
+  getSelectedGrowthPath,
+  getVisibleQuestions,
+  pruneHiddenAnswers,
+} from "@/lib/questionnaire-flow";
+import {
+  growthPaths,
   locales,
   type Locale,
   type PublicQuestion,
@@ -277,13 +281,23 @@ function GrowthCheck({
   const [honeypot, setHoneypot] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
   const [startedAt] = useState(() => Date.now());
   const [submissionToken] = useState(() => crypto.randomUUID());
-  const questions = questionnaire.questions;
+  const questions = getVisibleQuestions(questionnaire.questions, answers);
   const currentQuestion = questions[step];
   const isLast = step === questions.length - 1;
-  const progress = questions.length ? ((step + 1) / questions.length) * 100 : 0;
+  const selectedGrowthPath = getSelectedGrowthPath(questionnaire.questions, answers);
+  const expectedQuestionCount = selectedGrowthPath
+    ? questions.length
+    : Math.max(
+        questions.length,
+        ...growthPaths.map((growthPath) =>
+          questionnaire.questions.filter(
+            (question) => !question.config.flow || question.config.flow === growthPath,
+          ).length,
+        ),
+      );
+  const progress = expectedQuestionCount ? ((step + 1) / expectedQuestionCount) * 100 : 0;
 
   const moveFocus = () => {
     window.setTimeout(() => document.getElementById("question-heading")?.focus(), 0);
@@ -345,6 +359,8 @@ function GrowthCheck({
             utmCampaign: params.get("utm_campaign") || undefined,
             utmContent: params.get("utm_content") || undefined,
             utmTerm: params.get("utm_term") || undefined,
+            fbclid: params.get("fbclid") || undefined,
+            gclid: params.get("gclid") || undefined,
           },
         }),
       });
@@ -364,27 +380,12 @@ function GrowthCheck({
         return;
       }
 
-      setIsComplete(true);
+      window.location.replace("/thank-you");
     } catch {
       setError(text(siteCopy.connectError, locale));
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  if (isComplete) {
-    return (
-      <div className="form-success" role="status">
-        <span className="success-icon"><CircleCheckBig size={40} /></span>
-        <span className="form-kicker">{text(siteCopy.successKicker, locale)}</span>
-        <h2>{text(siteCopy.successTitle, locale)}</h2>
-        <p>{text(siteCopy.successBody, locale)}</p>
-        <div className="success-summary">
-          <span><Clock3 size={18} /> {text(siteCopy.humanFollowUp, locale)}</span>
-          <span><ShieldCheck size={18} /> {text(siteCopy.detailsPrivate, locale)}</span>
-        </div>
-      </div>
-    );
   }
 
   if (!currentQuestion) {
@@ -395,9 +396,9 @@ function GrowthCheck({
     <form onSubmit={submit} className="growth-form" noValidate>
       <div className="form-topline">
         <span className="form-kicker">{text(siteCopy.formKicker, locale)}</span>
-        <span className="step-count">{String(step + 1).padStart(2, "0")} / {String(questions.length).padStart(2, "0")}</span>
+        <span className="step-count">{String(step + 1).padStart(2, "0")} / {String(expectedQuestionCount).padStart(2, "0")}</span>
       </div>
-      <div className="progress-track" aria-label={`Question ${step + 1} of ${questions.length}`} role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={questions.length}>
+      <div className="progress-track" aria-label={`Question ${step + 1} of ${expectedQuestionCount}`} role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={expectedQuestionCount}>
         <span style={{ width: `${progress}%` }} />
       </div>
 
@@ -425,7 +426,12 @@ function GrowthCheck({
           locale={locale}
           value={answers[currentQuestion.key]}
           onChange={(value) => {
-            setAnswers((current) => ({ ...current, [currentQuestion.key]: value }));
+            setAnswers((current) =>
+              pruneHiddenAnswers(questionnaire.questions, {
+                ...current,
+                [currentQuestion.key]: value,
+              }),
+            );
             setError("");
           }}
         />

@@ -3,6 +3,16 @@ export type Locale = (typeof locales)[number];
 
 export type LocalizedText = Record<Locale, string>;
 
+export const growthPaths = ["lead_generation", "d2c_growth"] as const;
+export type GrowthPath = (typeof growthPaths)[number];
+
+export const systemQuestionRoles = [
+  "flow_selector",
+  "contact_name",
+  "contact_phone",
+] as const;
+export type SystemQuestionRole = (typeof systemQuestionRoles)[number];
+
 export const questionTypes = [
   "short_text",
   "long_text",
@@ -33,6 +43,10 @@ export type QuestionConfig = {
   minSelections?: number;
   maxSelections?: number;
   allowOther?: boolean;
+  /** Questions without a flow are shared by every questionnaire path. */
+  flow?: GrowthPath;
+  /** Stable internal meaning for questions whose copy remains admin-editable. */
+  systemRole?: SystemQuestionRole;
 };
 
 export type PublicQuestion = {

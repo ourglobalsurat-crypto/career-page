@@ -31,6 +31,12 @@ export async function POST(request: Request) {
     if (parsed.data.ids.length !== draftIds.size || parsed.data.ids.some((id) => !draftIds.has(id))) {
       return jsonError("Question list changed. Refresh and try again.", 409);
     }
+    const activeFlowSelector = draft.questions.find(
+      (question) => question.isActive && question.config.systemRole === "flow_selector",
+    );
+    if (activeFlowSelector && parsed.data.ids[0] !== activeFlowSelector.id) {
+      return jsonError("The service-path selector must remain the first question.", 400);
+    }
 
     const sql = getSql();
     const queries = parsed.data.ids.map((id, index) =>

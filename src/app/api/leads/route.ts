@@ -1,9 +1,22 @@
 import crypto from "node:crypto";
 
 import { getSql } from "@/lib/db";
+import { issueLeadReceipt } from "@/lib/lead-receipt";
+import {
+  getSelectedGrowthPath,
+  getVisibleQuestions,
+  isGrowthPath,
+} from "@/lib/questionnaire-flow";
 import { rateLimit, requestFingerprint } from "@/lib/rate-limit";
 import { jsonError } from "@/lib/security";
-import type { PublicQuestion, QuestionConfig, QuestionOption, QuestionType } from "@/lib/types";
+import type {
+  GrowthPath,
+  Locale,
+  PublicQuestion,
+  QuestionConfig,
+  QuestionOption,
+  QuestionType,
+} from "@/lib/types";
 import { leadSubmissionSchema, validateQuestionAnswer } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -22,6 +35,11 @@ type QuestionRow = {
   is_active: boolean;
 };
 
+type ExistingLeadRow = {
+  id: string;
+  growth_path: unknown;
+};
+
 function toPublicQuestion(row: QuestionRow): PublicQuestion {
   return {
     id: row.id,
@@ -36,6 +54,32 @@ function toPublicQuestion(row: QuestionRow): PublicQuestion {
     config: row.config ?? {},
     isActive: row.is_active,
   };
+}
+
+async function findExistingLead(submissionToken: string) {
+  const sql = getSql();
+  const rows = (await sql.query(
+    `SELECT l.id,
+            (SELECT la.answer
+             FROM lead_answers la
+             WHERE la.lead_id = l.id AND la.question_key = 'growth_path'
+             LIMIT 1) AS growth_path
+     FROM leads l
+     WHERE l.submission_token = $1
+     LIMIT 1`,
+    [submissionToken],
+  )) as ExistingLeadRow[];
+  return rows[0] ?? null;
+}
+
+async function successResponse(
+  leadId: string,
+  locale: Locale,
+  growthPath: GrowthPath | "general",
+  status = 200,
+) {
+  await issueLeadReceipt(leadId, locale, growthPath);
+  return Response.json({ ok: true, leadId }, { status });
 }
 
 export async function POST(request: Request) {
@@ -101,12 +145,18 @@ export async function POST(request: Request) {
       return jsonError("The form contains an answer we do not recognize.", 400);
     }
 
+    const visibleQuestions = getVisibleQuestions(questions, payload.answers);
+    const visibleKeys = new Set(visibleQuestions.map((question) => question.key));
+    if (Object.keys(payload.answers).some((key) => !visibleKeys.has(key))) {
+      return jsonError("Your answers no longer match the selected growth path. Please review the form.", 400);
+    }
+
     const validatedAnswers: Array<{
       question: PublicQuestion;
       value: unknown;
     }> = [];
 
-    for (const question of questions) {
+    for (const question of visibleQuestions) {
       const result = validateQuestionAnswer(question, payload.answers[question.key]);
       if (!result.ok) {
         return Response.json(
@@ -117,15 +167,22 @@ export async function POST(request: Request) {
       if (result.value !== null) validatedAnswers.push({ question, value: result.value });
     }
 
-    const existing = (await sql.query(
-      `SELECT id FROM leads WHERE submission_token = $1 LIMIT 1`,
-      [payload.submissionToken],
-    )) as { id: string }[];
-    if (existing[0]) return Response.json({ ok: true, leadId: existing[0].id });
+    const existing = await findExistingLead(payload.submissionToken);
+    if (existing) {
+      const existingGrowthPath = isGrowthPath(existing.growth_path)
+        ? existing.growth_path
+        : "general";
+      return successResponse(existing.id, payload.language, existingGrowthPath);
+    }
 
     const byKey = new Map(validatedAnswers.map((item) => [item.question.key, item.value]));
-    const name = typeof byKey.get("full_name") === "string" ? byKey.get("full_name") : null;
-    const phone = typeof byKey.get("phone") === "string" ? byKey.get("phone") : null;
+    const valueForRole = (role: "contact_name" | "contact_phone", legacyKey: string) =>
+      validatedAnswers.find((item) => item.question.config.systemRole === role)?.value
+      ?? byKey.get(legacyKey);
+    const nameValue = valueForRole("contact_name", "full_name");
+    const phoneValue = valueForRole("contact_phone", "phone");
+    const name = typeof nameValue === "string" ? nameValue : null;
+    const phone = typeof phoneValue === "string" ? phoneValue : null;
     const email = typeof byKey.get("email") === "string" ? byKey.get("email") : null;
     const city = typeof byKey.get("city") === "string" ? byKey.get("city") : null;
     const leadId = crypto.randomUUID();
@@ -136,6 +193,8 @@ export async function POST(request: Request) {
       campaign: attribution.utmCampaign ?? "",
       content: attribution.utmContent ?? "",
       term: attribution.utmTerm ?? "",
+      fbclid: attribution.fbclid ?? "",
+      gclid: attribution.gclid ?? "",
     };
 
     const queries = [
@@ -156,7 +215,7 @@ export async function POST(request: Request) {
           phone,
           email,
           city,
-          attribution.utmSource || attribution.source || "direct",
+          attribution.utmSource || attribution.source || (attribution.fbclid ? "facebook" : "direct"),
           attribution.referrer || null,
           JSON.stringify(utm),
           payload.submissionToken,
@@ -184,10 +243,19 @@ export async function POST(request: Request) {
     ];
 
     await sql.transaction(queries);
-    return Response.json({ ok: true, leadId }, { status: 201 });
+    const growthPath = getSelectedGrowthPath(questions, payload.answers) ?? "general";
+    return successResponse(leadId, payload.language, growthPath, 201);
   } catch (error) {
     const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
-    if (code === "23505") return Response.json({ ok: true });
+    if (code === "23505") {
+      const existing = await findExistingLead(payload.submissionToken);
+      if (existing) {
+        const existingGrowthPath = isGrowthPath(existing.growth_path)
+          ? existing.growth_path
+          : "general";
+        return successResponse(existing.id, payload.language, existingGrowthPath);
+      }
+    }
 
     console.error("Lead submission failed.", error);
     return jsonError("Something went wrong while saving your details. Please try again.", 503);

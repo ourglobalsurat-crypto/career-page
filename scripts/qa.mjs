@@ -10,7 +10,10 @@ dotenv.config({ path: path.resolve(".env.local"), quiet: true });
 const baseUrl = process.env.QA_BASE_URL ?? "http://localhost:3000";
 const outputDir = path.resolve("artifacts", "qa");
 const errors = [];
-let createdLeadId = null;
+const createdLeadIds = new Set();
+const qaRunId = Date.now().toString(36);
+const leadGenerationName = `QA Lead Generation ${qaRunId}`;
+const d2cGrowthName = `QA D2C Growth ${qaRunId}`;
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -21,6 +24,18 @@ function watchPage(page, label) {
     if (message.type() === "error") errors.push(`${label} console: ${message.text()}`);
   });
   page.on("pageerror", (error) => errors.push(`${label} page: ${error.message}`));
+}
+
+function rememberCreatedLead(result) {
+  if (typeof result?.leadId === "string") createdLeadIds.add(result.leadId);
+}
+
+function assertThankYouUrl(url, submittedName, submittedPhone) {
+  const parsed = new URL(url);
+  assert(parsed.pathname === "/thank-you", `Expected /thank-you, received ${parsed.pathname}.`);
+  assert(parsed.search === "" && parsed.hash === "", "Thank-you URL must not contain query parameters or a hash.");
+  assert(!url.includes(encodeURIComponent(submittedName)) && !url.includes(submittedName), "Thank-you URL exposes the submitted name.");
+  assert(!url.includes(submittedPhone), "Thank-you URL exposes the submitted phone number.");
 }
 
 await mkdir(outputDir, { recursive: true });
@@ -34,10 +49,16 @@ try {
   const page = await desktopContext.newPage();
   watchPage(page, "desktop");
 
+  const directThankYouContext = await browser.newContext();
+  const directThankYouPage = await directThankYouContext.newPage();
+  await directThankYouPage.goto(`${baseUrl}/thank-you`, { waitUntil: "domcontentloaded" });
+  await directThankYouPage.waitForURL(`${baseUrl}/contact#growth-check`, { timeout: 15000 });
+  await directThankYouContext.close();
+
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   assert((await page.title()).includes("Global Surat"), "Landing page title is incorrect.");
   assert(await page.getByRole("heading", { name: /Want more customers/ }).isVisible(), "English hero heading is not visible by default.");
-  assert(await page.getByRole("heading", { name: /What would help your business most right now/ }).isVisible(), "English questionnaire is not visible above the fold.");
+  assert(await page.getByRole("heading", { name: /What would you like help with/ }).isVisible(), "English questionnaire is not visible above the fold.");
   assert(await page.evaluate(() => document.documentElement.lang === "en-IN"), "English is not the page's default language.");
   assert(
     JSON.stringify(await page.locator(".language-switch button").allTextContents()) === JSON.stringify(["English", "हिन्दी", "ગુજરાતી"]),
@@ -54,44 +75,125 @@ try {
 
   await page.getByRole("button", { name: "हिन्दी" }).click();
   assert(await page.getByRole("heading", { name: /अपने बिज़नेस के लिए ज़्यादा/ }).isVisible(), "Hindi hero heading is not visible.");
-  assert(await page.getByRole("heading", { name: /अभी आपके बिज़नेस को/ }).isVisible(), "Hindi questionnaire is not visible.");
+  assert(await page.getByRole("heading", { name: /आपको किस काम में मदद चाहिए/ }).isVisible(), "Hindi questionnaire is not visible.");
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Hindi page has horizontal overflow.");
   await page.screenshot({ path: path.join(outputDir, "landing-hindi.png"), fullPage: false });
 
   await page.getByRole("button", { name: "ગુજરાતી" }).click();
   assert(await page.getByRole("heading", { name: /તમારા બિઝનેસ માટે વધુ/ }).isVisible(), "Gujarati hero heading is not visible.");
-  assert(await page.getByRole("heading", { name: /અત્યારે તમારા બિઝનેસને/ }).isVisible(), "Gujarati questionnaire is not visible.");
+  assert(await page.getByRole("heading", { name: /તમને કઈ બાબતમાં મદદ જોઈએ છે/ }).isVisible(), "Gujarati questionnaire is not visible.");
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Gujarati page has horizontal overflow.");
   await page.screenshot({ path: path.join(outputDir, "landing-gujarati.png"), fullPage: false });
 
   await page.getByRole("button", { name: "English" }).click();
-  await page.getByRole("button", { name: /More calls & WhatsApp enquiries/ }).click();
+
+  // Start on Lead Generation, answer one branch-only question, then switch to
+  // D2C. The stale Lead Generation answer must be pruned before submission.
+  await page.getByRole("radio", { name: /Get more enquiries/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("radio", { name: /I provide a service/ }).click();
+  assert(await page.getByRole("heading", { name: /What type of business do you operate/ }).isVisible(), "Lead Generation branch did not open.");
+  await page.getByRole("radio", { name: /^B2B/ }).click();
+  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("radio", { name: /Grow online product sales/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("radio", { name: /Running, but growth is slow/ }).click();
+  assert(await page.getByRole("heading", { name: /Share your website or online store link/ }).isVisible(), "D2C Growth branch did not open after switching paths.");
+  assert((await page.locator(".step-count").textContent())?.trim() === "02 / 06", "D2C progress does not use the six-question visible path.");
+  await page.getByPlaceholder(/yourstore\.com/).fill("https://qa-store.example");
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("radio", { name: "₹20,000 – ₹50,000" }).click();
+  await page.getByRole("radio", { name: /Pre-launch \/ New Brand/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("radio", { name: "Within 30 days" }).click();
+  await page.getByRole("radio", { name: /₹1–3 lakh/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByPlaceholder("Type your full name").fill("QA Test Lead");
+  await page.getByPlaceholder("Enter your full name").fill(d2cGrowthName);
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByPlaceholder("10-digit mobile number").fill("9876543210");
+  const d2cPhone = "9876543210";
+  await page.getByPlaceholder("Enter your WhatsApp number").fill(d2cPhone);
+  await page.locator(".consent-row input").check();
+
+  const d2cResponsePromise = page.waitForResponse((response) => response.url().endsWith("/api/leads") && response.request().method() === "POST");
+  await page.getByRole("button", { name: /Send my details/ }).click();
+  const d2cResponse = await d2cResponsePromise;
+  const d2cResult = await d2cResponse.json();
+  rememberCreatedLead(d2cResult);
+  assert(d2cResponse.status() === 201 && d2cResult.ok, `D2C lead submission failed with ${d2cResponse.status()}.`);
+
+  const d2cAnswers = d2cResponse.request().postDataJSON()?.answers ?? {};
+  assert(d2cAnswers.growth_path === "d2c_growth", "D2C submission has the wrong growth path.");
+  assert(
+    JSON.stringify(Object.keys(d2cAnswers).sort()) === JSON.stringify([
+      "full_name",
+      "growth_path",
+      "monthly_ad_budget",
+      "monthly_online_revenue",
+      "phone",
+      "website_url",
+    ]),
+    "D2C submission retained a hidden Lead Generation answer or omitted a visible answer.",
+  );
+
+  await page.waitForURL(`${baseUrl}/thank-you`, { timeout: 15000 });
+  assertThankYouUrl(page.url(), d2cGrowthName, d2cPhone);
+  await page.getByRole("heading", { name: "Your Details Have Been Received!" }).waitFor();
+  assert(await page.getByText(/growth team will review your business details/).isVisible(), "Thank-you explanation is missing.");
+  assert(await page.getByRole("link", { name: /Discuss My Growth Plan on WhatsApp/ }).isVisible(), "Thank-you WhatsApp CTA is missing.");
+  await page.waitForFunction(() => window.dataLayer?.some((entry) => entry.event === "generate_lead"));
+  const d2cConversionEvents = await page.evaluate(() =>
+    window.dataLayer?.filter((entry) => entry.event === "generate_lead") ?? [],
+  );
+  assert(d2cConversionEvents.length === 1, "D2C conversion event was missing or emitted more than once.");
+  assert(d2cConversionEvents[0]?.growth_path === "d2c_growth", "D2C conversion event has the wrong growth path.");
+  assert(typeof d2cConversionEvents[0]?.event_id === "string", "D2C conversion event is missing its opaque event ID.");
+  await page.screenshot({ path: path.join(outputDir, "thank-you-d2c.png"), fullPage: false });
+
+  // Submit a fresh lead through the other branch so both server-side validation
+  // paths, persistence, and thank-you redirects are exercised.
+  await page.goto(`${baseUrl}/contact`, { waitUntil: "networkidle" });
+  await page.getByRole("radio", { name: /Get more enquiries/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByPlaceholder("Example: Surat").fill("Surat");
+  assert((await page.locator(".step-count").textContent())?.trim() === "02 / 06", "Lead Generation progress does not use the six-question visible path.");
+  await page.getByRole("radio", { name: /Both B2B and B2C/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByPlaceholder(/We get enquiries/).fill("Automated end-to-end QA submission.");
+  await page.getByRole("radio", { name: /Gujarat/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("radio", { name: /worked with an agency/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByPlaceholder("Enter your full name").fill(leadGenerationName);
+  await page.getByRole("button", { name: "Continue" }).click();
+  const leadPhone = "9876543211";
+  await page.getByPlaceholder("Enter your WhatsApp number").fill(leadPhone);
   await page.locator(".consent-row input").check();
 
   const leadResponsePromise = page.waitForResponse((response) => response.url().endsWith("/api/leads") && response.request().method() === "POST");
   await page.getByRole("button", { name: /Send my details/ }).click();
   const leadResponse = await leadResponsePromise;
   const leadResult = await leadResponse.json();
-  assert(leadResponse.status() === 201 && leadResult.ok, `Lead submission failed with ${leadResponse.status()}.`);
-  createdLeadId = leadResult.leadId;
-  await page.getByRole("heading", { name: /we’ve got it/ }).waitFor();
-  await page.screenshot({ path: path.join(outputDir, "landing-success.png"), fullPage: false });
+  rememberCreatedLead(leadResult);
+  assert(leadResponse.status() === 201 && leadResult.ok, `Lead Generation submission failed with ${leadResponse.status()}.`);
+
+  const leadAnswers = leadResponse.request().postDataJSON()?.answers ?? {};
+  assert(leadAnswers.growth_path === "lead_generation", "Lead Generation submission has the wrong growth path.");
+  assert(
+    JSON.stringify(Object.keys(leadAnswers).sort()) === JSON.stringify([
+      "full_name",
+      "growth_path",
+      "lead_business_model",
+      "lead_campaign_experience",
+      "lead_target_location",
+      "phone",
+    ]),
+    "Lead Generation submission omitted a visible answer or included a hidden D2C answer.",
+  );
+
+  await page.waitForURL(`${baseUrl}/thank-you`, { timeout: 15000 });
+  assertThankYouUrl(page.url(), leadGenerationName, leadPhone);
+  await page.getByRole("heading", { name: "Your Details Have Been Received!" }).waitFor();
+  await page.waitForFunction(() => window.dataLayer?.some((entry) => entry.event === "generate_lead"));
+  const leadConversionEvents = await page.evaluate(() =>
+    window.dataLayer?.filter((entry) => entry.event === "generate_lead") ?? [],
+  );
+  assert(leadConversionEvents.length === 1, "Lead Generation conversion event was missing or emitted more than once.");
+  assert(leadConversionEvents[0]?.growth_path === "lead_generation", "Lead Generation conversion event has the wrong growth path.");
+  await page.screenshot({ path: path.join(outputDir, "thank-you-lead-generation.png"), fullPage: false });
 
   await page.goto(`${baseUrl}/admin/login`, { waitUntil: "networkidle" });
   await page.locator("#admin-email").fill(process.env.ADMIN_EMAIL);
@@ -99,11 +201,12 @@ try {
   await page.getByRole("button", { name: /Open lead desk/ }).click();
   await page.waitForURL(`${baseUrl}/admin`, { timeout: 15000 });
   await page.getByRole("heading", { name: "Lead pulse" }).waitFor();
-  assert(await page.getByText("QA Test Lead", { exact: true }).isVisible(), "Submitted lead did not appear in the dashboard.");
+  assert(await page.getByText(leadGenerationName, { exact: true }).isVisible(), "Lead Generation submission did not appear in the dashboard.");
+  assert(await page.getByText(d2cGrowthName, { exact: true }).isVisible(), "D2C submission did not appear in the dashboard.");
   await page.screenshot({ path: path.join(outputDir, "admin-dashboard.png"), fullPage: true });
 
-  await page.getByRole("link", { name: "View QA Test Lead" }).click();
-  await page.waitForURL(new RegExp(`/admin/leads/${createdLeadId}$`));
+  await page.getByRole("link", { name: `View ${leadGenerationName}` }).click();
+  await page.waitForURL(new RegExp(`/admin/leads/${leadResult.leadId}$`));
   await page.locator(".lead-status-select").selectOption("qualified");
   await page.getByLabel("Add an internal note").fill("Automated QA note: lead update works.");
   await page.getByRole("button", { name: /Save note/ }).click();
@@ -155,15 +258,15 @@ try {
   await narrowContext.close();
 
   assert(errors.length === 0, `Browser errors:\n${errors.join("\n")}`);
-  console.log("Browser QA passed: public flow, Neon persistence, admin login, lead updates, builder CRUD, and 1440/390/320 layouts.");
+  console.log("Browser QA passed: both questionnaire branches, branch-switch pruning, private thank-you redirects, Neon persistence, admin login, lead updates, builder CRUD, and 1440/390/320 layouts.");
   console.log(`Screenshots: ${outputDir}`);
 } finally {
   await browser.close();
 
   const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
   if (sql) {
-    if (createdLeadId) {
-      await sql.query(`DELETE FROM leads WHERE id = $1 AND name = 'QA Test Lead'`, [createdLeadId]);
+    for (const leadId of createdLeadIds) {
+      await sql.query(`DELETE FROM leads WHERE id = $1`, [leadId]);
     }
     await sql.query(
       `DELETE FROM questions

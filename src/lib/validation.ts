@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 import {
+  growthPaths,
   locales,
   questionTypes,
+  systemQuestionRoles,
   type PublicQuestion,
   type QuestionOption,
 } from "@/lib/types";
@@ -42,6 +44,8 @@ export const questionPayloadSchema = z.object({
     minSelections: z.number().int().min(0).max(50).optional(),
     maxSelections: z.number().int().min(1).max(50).optional(),
     allowOther: z.boolean().optional(),
+    flow: z.enum(growthPaths).optional(),
+    systemRole: z.enum(systemQuestionRoles).optional(),
   }),
   isActive: z.boolean().default(true),
 });
@@ -64,6 +68,8 @@ export const leadSubmissionSchema = z.object({
       utmCampaign: z.string().trim().max(200).optional(),
       utmContent: z.string().trim().max(200).optional(),
       utmTerm: z.string().trim().max(200).optional(),
+      fbclid: z.string().trim().max(250).optional(),
+      gclid: z.string().trim().max(250).optional(),
     })
     .optional(),
 });

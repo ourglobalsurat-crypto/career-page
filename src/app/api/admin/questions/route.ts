@@ -25,6 +25,9 @@ export async function POST(request: Request) {
   if (!parsed.success) return jsonError(parsed.error.issues[0]?.message ?? "Check the question fields.", 400);
 
   const question = parsed.data;
+  if (question.config.systemRole) {
+    return jsonError("Core form roles cannot be assigned to new questions.", 400);
+  }
   if (choiceTypes.has(question.type) && question.options.length < 2) {
     return jsonError("Choice questions need at least two options.", 400);
   }

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "db:setup": "tsx scripts/setup-db.ts",
     "db:publish-language-update": "tsx scripts/publish-language-update.ts",
+    "db:publish-branching-form": "tsx scripts/publish-branching-questionnaire.ts",
     "qa:e2e": "node scripts/qa.mjs"
   },
   "dependencies": {

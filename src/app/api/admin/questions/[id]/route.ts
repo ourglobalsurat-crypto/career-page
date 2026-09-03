@@ -1,9 +1,27 @@
 import { getAdminSession } from "@/lib/auth";
 import { getSql } from "@/lib/db";
 import { isSameOrigin, jsonError } from "@/lib/security";
+import type { QuestionConfig, QuestionOption, QuestionType } from "@/lib/types";
 import { questionPayloadSchema } from "@/lib/validation";
 
 const choiceTypes = new Set(["single_choice", "multi_choice", "dropdown"]);
+
+type ExistingQuestionRow = {
+  id: string;
+  question_key: string;
+  question_type: QuestionType;
+  required: boolean;
+  options: QuestionOption[];
+  config: QuestionConfig;
+  is_active: boolean;
+};
+
+function sameOptionStructure(left: QuestionOption[], right: QuestionOption[]) {
+  return (
+    left.length === right.length &&
+    left.every((option, index) => option.id === right[index]?.id)
+  );
+}
 
 export async function PATCH(
   request: Request,
@@ -31,6 +49,61 @@ export async function PATCH(
 
   try {
     const sql = getSql();
+    const existingRows = (await sql.query(
+      `SELECT q.id, q.question_key, q.question_type, q.required,
+              q.options, q.config, q.is_active
+       FROM questions q
+       JOIN form_versions fv ON fv.id = q.version_id
+       WHERE q.id = $1 AND fv.status = 'draft'
+       LIMIT 1`,
+      [id],
+    )) as ExistingQuestionRow[];
+    const existing = existingRows[0];
+    if (!existing) return jsonError("Question was not found in the current draft.", 404);
+
+    const existingRole = existing.config.systemRole;
+    if (!existingRole && question.config.systemRole) {
+      return jsonError("Core form roles cannot be assigned to regular questions.", 400);
+    }
+
+    if (existingRole) {
+      const structureChanged =
+        question.key !== existing.question_key ||
+        question.type !== existing.question_type ||
+        question.required !== existing.required ||
+        question.isActive !== existing.is_active ||
+        question.config.systemRole !== existingRole ||
+        question.config.flow !== existing.config.flow;
+      if (structureChanged) {
+        return jsonError(
+          "This is a core form question. Edit its wording without changing its key, type, path, or required/visible settings.",
+          400,
+        );
+      }
+
+      if (
+        existingRole === "flow_selector" &&
+        !sameOptionStructure(existing.options ?? [], question.options)
+      ) {
+        return jsonError(
+          "The Lead Generation and D2C selector options cannot be added, removed, reordered, or replaced.",
+          400,
+        );
+      }
+    }
+
+    const savedConfig: QuestionConfig = existingRole
+      ? {
+          ...question.config,
+          flow: existing.config.flow,
+          systemRole: existingRole,
+        }
+      : { ...question.config, systemRole: undefined };
+    const savedKey = existingRole ? existing.question_key : question.key;
+    const savedType = existingRole ? existing.question_type : question.type;
+    const savedRequired = existingRole ? existing.required : question.required;
+    const savedActive = existingRole ? existing.is_active : question.isActive;
+
     const rows = (await sql.query(
       `UPDATE questions q
        SET question_key = $1,
@@ -49,15 +122,15 @@ export async function PATCH(
          AND fv.status = 'draft'
        RETURNING q.id`,
       [
-        question.key,
-        question.type,
+        savedKey,
+        savedType,
         JSON.stringify(question.label),
         JSON.stringify(question.helpText),
         JSON.stringify(question.placeholder),
-        question.required,
+        savedRequired,
         JSON.stringify(question.options),
-        JSON.stringify(question.config),
-        question.isActive,
+        JSON.stringify(savedConfig),
+        savedActive,
         id,
       ],
     )) as { id: string }[];
@@ -67,7 +140,7 @@ export async function PATCH(
     await sql.query(
       `INSERT INTO audit_log (admin_id, action, entity_type, entity_id, metadata)
        VALUES ($1, 'question.updated', 'question', $2, $3::jsonb)`,
-      [admin.id, id, JSON.stringify({ key: question.key })],
+      [admin.id, id, JSON.stringify({ key: savedKey })],
     );
 
     return Response.json({ ok: true });
@@ -93,21 +166,39 @@ export async function DELETE(
   try {
     const sql = getSql();
     const rows = (await sql.query(
-      `DELETE FROM questions q
-       USING form_versions fv
-       WHERE q.id = $1
-         AND q.version_id = fv.id
-         AND fv.status = 'draft'
-       RETURNING q.id, q.question_key`,
+      `WITH target AS MATERIALIZED (
+         SELECT q.id, q.question_key, q.config
+         FROM questions q
+         JOIN form_versions fv ON fv.id = q.version_id
+         WHERE q.id = $1 AND fv.status = 'draft'
+       ), deleted AS (
+         DELETE FROM questions q
+         USING target t
+         WHERE q.id = t.id
+           AND (t.config->>'systemRole') IS NULL
+         RETURNING q.id
+       )
+       SELECT t.id AS target_id, t.question_key, t.config,
+              d.id AS deleted_id
+       FROM target t
+       LEFT JOIN deleted d ON d.id = t.id`,
       [id],
-    )) as { id: string; question_key: string }[];
-    const removed = rows[0];
-    if (!removed) return jsonError("Question was not found in the current draft.", 404);
+    )) as Array<{
+      target_id: string;
+      question_key: string;
+      config: QuestionConfig;
+      deleted_id: string | null;
+    }>;
+    const target = rows[0];
+    if (!target) return jsonError("Question was not found in the current draft.", 404);
+    if (!target.deleted_id) {
+      return jsonError("Core form questions cannot be deleted. Edit their wording instead.", 400);
+    }
 
     await sql.query(
       `INSERT INTO audit_log (admin_id, action, entity_type, entity_id, metadata)
        VALUES ($1, 'question.deleted', 'question', $2, $3::jsonb)`,
-      [admin.id, id, JSON.stringify({ key: removed.question_key })],
+      [admin.id, id, JSON.stringify({ key: target.question_key })],
     );
     return Response.json({ ok: true });
   } catch (error) {

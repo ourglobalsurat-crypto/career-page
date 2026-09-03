@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { getAdminSession } from "@/lib/auth";
 import { getSql } from "@/lib/db";
 import { getDraftQuestionnaire } from "@/lib/questionnaire";
+import { validateQuestionnaireFlow } from "@/lib/questionnaire-flow";
 import { isSameOrigin, jsonError } from "@/lib/security";
 
 export async function POST(request: Request) {
@@ -15,6 +16,8 @@ export async function POST(request: Request) {
     const draft = await getDraftQuestionnaire();
     if (!draft) return jsonError("No editable draft exists.", 409);
     if (draft.questions.length === 0) return jsonError("Add at least one question before publishing.", 400);
+    const flowError = validateQuestionnaireFlow(draft.questions);
+    if (flowError) return jsonError(flowError, 400);
 
     const sql = getSql();
     const nextVersionId = crypto.randomUUID();
