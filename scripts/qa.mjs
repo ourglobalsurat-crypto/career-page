@@ -36,8 +36,13 @@ try {
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   assert((await page.title()).includes("Global Surat"), "Landing page title is incorrect.");
-  assert(await page.getByRole("heading", { name: /તમારા બિઝનેસ માટે વધુ/ }).isVisible(), "Gujarati hero heading is not visible.");
-  assert(await page.getByRole("heading", { name: /અત્યારે તમારા બિઝનેસને/ }).isVisible(), "Gujarati questionnaire is not visible above the fold.");
+  assert(await page.getByRole("heading", { name: /Want more customers/ }).isVisible(), "English hero heading is not visible by default.");
+  assert(await page.getByRole("heading", { name: /What would help your business most right now/ }).isVisible(), "English questionnaire is not visible above the fold.");
+  assert(await page.evaluate(() => document.documentElement.lang === "en-IN"), "English is not the page's default language.");
+  assert(
+    JSON.stringify(await page.locator(".language-switch button").allTextContents()) === JSON.stringify(["English", "हिन्दी", "ગુજરાતી"]),
+    "Language choices are not ordered English, Hindi, Gujarati.",
+  );
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Desktop page has horizontal overflow.");
   assert(await page.evaluate(() => {
     const header = document.querySelector(".site-header")?.getBoundingClientRect();
@@ -52,6 +57,12 @@ try {
   assert(await page.getByRole("heading", { name: /अभी आपके बिज़नेस को/ }).isVisible(), "Hindi questionnaire is not visible.");
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Hindi page has horizontal overflow.");
   await page.screenshot({ path: path.join(outputDir, "landing-hindi.png"), fullPage: false });
+
+  await page.getByRole("button", { name: "ગુજરાતી" }).click();
+  assert(await page.getByRole("heading", { name: /તમારા બિઝનેસ માટે વધુ/ }).isVisible(), "Gujarati hero heading is not visible.");
+  assert(await page.getByRole("heading", { name: /અત્યારે તમારા બિઝનેસને/ }).isVisible(), "Gujarati questionnaire is not visible.");
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Gujarati page has horizontal overflow.");
+  await page.screenshot({ path: path.join(outputDir, "landing-gujarati.png"), fullPage: false });
 
   await page.getByRole("button", { name: "English" }).click();
   await page.getByRole("button", { name: /More calls & WhatsApp enquiries/ }).click();

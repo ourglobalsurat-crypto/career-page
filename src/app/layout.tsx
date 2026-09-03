@@ -68,7 +68,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="gu-IN"
+      lang="en-IN"
       className={`${manrope.variable} ${display.variable} ${gujarati.variable} ${devanagari.variable}`}
       data-scroll-behavior="smooth"
     >

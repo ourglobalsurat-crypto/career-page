@@ -31,7 +31,13 @@ import {
   siteCopy,
   text,
 } from "@/lib/copy";
-import type { Locale, PublicQuestion, PublicQuestionnaire, QuestionOption } from "@/lib/types";
+import {
+  locales,
+  type Locale,
+  type PublicQuestion,
+  type PublicQuestionnaire,
+  type QuestionOption,
+} from "@/lib/types";
 import { validateQuestionAnswer } from "@/lib/validation";
 
 type AnswerMap = Record<string, unknown>;
@@ -396,7 +402,7 @@ function GrowthCheck({
       </div>
 
       <div className="form-language-mobile" aria-label="Choose language">
-        {(["gu", "hi", "en"] as Locale[]).map((item) => (
+        {locales.map((item) => (
           <button key={item} type="button" aria-pressed={locale === item} className={locale === item ? "active" : ""} onClick={() => onLocaleChange(item)}>
             {languageNames[item]}
           </button>
@@ -460,7 +466,7 @@ function GrowthCheck({
 }
 
 export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionnaire }) {
-  const [locale, setLocale] = useState<Locale>("gu");
+  const [locale, setLocale] = useState<Locale>("en");
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : "#growth-check";
   const activeCopy = useMemo(() => ({
@@ -515,7 +521,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
             {text(siteCopy.mainWebsite, locale)} <ExternalLink size={14} />
           </a>
           <div className="language-switch" role="group" aria-label="Choose page language">
-            {(["gu", "hi", "en"] as Locale[]).map((item) => (
+            {locales.map((item) => (
               <button key={item} type="button" aria-pressed={locale === item} className={locale === item ? "active" : ""} onClick={() => setLocale(item)}>
                 {languageNames[item]}
               </button>
