@@ -640,7 +640,6 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
           <a href={contactEmailHref}>{contactEmail}</a>
           <span>© {new Date().getFullYear()} Global Surat</span>
           <a href={MAIN_WEBSITE_URL} target="_blank" rel="noopener noreferrer">{text(siteCopy.websiteShort, locale)} ↗</a>
-          <a href="/gsm-admin/login">Admin</a>
         </div>
       </footer>
 

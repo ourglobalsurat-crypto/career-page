@@ -8,7 +8,7 @@ import { getAdminSession } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Admin login",
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: false, noarchive: true, nosnippet: true, noimageindex: true },
 };
 
 export default async function AdminLoginPage() {

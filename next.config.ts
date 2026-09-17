@@ -42,6 +42,10 @@ const nextConfig: NextConfig = {
 
     return [
       { source: "/:path*", headers: securityHeaders },
+      ...["/gsm-admin/:path*", "/api/admin/:path*", "/admin/:path*"].map(source => ({
+        source,
+        headers: [{key:"X-Robots-Tag",value:"noindex, nofollow, noarchive, nosnippet, noimageindex"}],
+      })),
       { source: "/api/admin/resumes/:id", headers: [
         {key:"X-Frame-Options",value:"SAMEORIGIN"},
         {key:"Content-Security-Policy",value:"default-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"},

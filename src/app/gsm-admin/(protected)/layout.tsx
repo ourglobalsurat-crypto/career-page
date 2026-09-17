@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Lead Desk",
-  robots: { index: false, follow: false, noarchive: true },
+  robots: { index: false, follow: false, noarchive: true, nosnippet: true, noimageindex: true },
 };
 
 export const dynamic = "force-dynamic";
