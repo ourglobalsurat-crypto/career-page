@@ -1,3 +1,4 @@
+import {contactPhone, contactPhoneHref, contactEmail, contactEmailHref, whatsappNumber} from "@/lib/contact-details";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { redirect } from "next/navigation";
@@ -35,8 +36,6 @@ export default async function ThankYouPage() {
   const receipt = await verifyLeadReceipt();
   if (!receipt) redirect("/contact#growth-check");
 
-  const rawWhatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
-  const whatsappNumber = rawWhatsappNumber.replace(/\D/g, "");
   const hasWhatsappNumber = /^\d{8,15}$/.test(whatsappNumber);
   const whatsappHref = hasWhatsappNumber
     ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
@@ -90,6 +89,8 @@ export default async function ThankYouPage() {
       </section>
 
       <footer className="thank-you-footer">
+        <a href={contactPhoneHref}>{contactPhone}</a>
+        <a href={contactEmailHref}>{contactEmail}</a>
         <a href="https://globalsurat.com/" target="_blank" rel="noopener noreferrer">
           {localized(copy.website, receipt.locale)} <ArrowUpRight size={15} aria-hidden="true" />
         </a>

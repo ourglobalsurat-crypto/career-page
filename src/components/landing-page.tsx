@@ -1,5 +1,6 @@
 "use client";
 
+import {contactPhone, contactPhoneHref, contactEmail, contactEmailHref, whatsappNumber} from "@/lib/contact-details";
 import {
   ArrowLeft,
   ArrowRight,
@@ -420,7 +421,6 @@ function GrowthCheck({
 
 export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionnaire }) {
   const locale: Locale = "en";
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : "#growth-check";
   const services = questionnaire.questions.find(q => q.config.systemRole === 'flow_selector')?.options.map((option,index) => ({
     number: String(index+1).padStart(2,'0'), title: option.label,
@@ -636,6 +636,8 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
         </a>
         <p>{text(siteCopy.footerBody, locale)}</p>
         <div>
+          <a href={contactPhoneHref}>{contactPhone}</a>
+          <a href={contactEmailHref}>{contactEmail}</a>
           <span>© {new Date().getFullYear()} Global Surat</span>
           <a href={MAIN_WEBSITE_URL} target="_blank" rel="noopener noreferrer">{text(siteCopy.websiteShort, locale)} ↗</a>
           <a href="/gsm-admin/login">Admin</a>

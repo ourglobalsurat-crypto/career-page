@@ -1776,6 +1776,8 @@ html[lang^="hi"] .site-shell :is(
   position: relative;
   z-index: 1;
   display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
   justify-content: center;
   min-height: 70px;
   padding: 20px;
