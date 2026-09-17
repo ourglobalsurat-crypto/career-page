@@ -15,9 +15,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 const navigation = [
-  { href: "/admin", label: "Overview", icon: BarChart3 },
-  { href: "/admin/leads", label: "Leads", icon: Users },
-  { href: "/admin/questionnaire", label: "Questionnaire", icon: ClipboardList },
+  { href: "/gsm-admin", label: "Overview", icon: BarChart3 },
+  { href: "/gsm-admin/leads", label: "Applications", icon: Users },
+  { href: "/gsm-admin/questionnaire", label: "Positions & questions", icon: ClipboardList },
 ];
 
 export function AdminShell({
@@ -36,7 +36,7 @@ export function AdminShell({
     setIsLoggingOut(true);
     try {
       await fetch("/api/admin/logout", { method: "POST" });
-      router.replace("/admin/login");
+      router.replace("/gsm-admin/login");
       router.refresh();
     } finally {
       setIsLoggingOut(false);
@@ -53,13 +53,13 @@ export function AdminShell({
       </header>
 
       <aside className={isMenuOpen ? "admin-sidebar open" : "admin-sidebar"}>
-        <Link href="/admin" className="admin-brand" onClick={() => setIsMenuOpen(false)}>
+        <Link href="/gsm-admin" className="admin-brand" onClick={() => setIsMenuOpen(false)}>
           <Image src="/assets/global-surat-logo.png" alt="Global Surat" width={175} height={94} priority />
-          <span>LEAD DESK</span>
+          <span>HIRING DESK</span>
         </Link>
         <nav aria-label="Admin navigation">
           {navigation.map((item) => {
-            const active = item.href === "/admin" ? pathname === item.href : pathname.startsWith(item.href);
+            const active = item.href === "/gsm-admin" ? pathname === item.href : pathname.startsWith(item.href);
             const Icon = item.icon;
             return (
               <Link key={item.href} href={item.href} className={active ? "active" : ""} onClick={() => setIsMenuOpen(false)}>

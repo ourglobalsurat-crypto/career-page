@@ -195,24 +195,24 @@ try {
   assert(leadConversionEvents[0]?.growth_path === "lead_generation", "Lead Generation conversion event has the wrong growth path.");
   await page.screenshot({ path: path.join(outputDir, "thank-you-lead-generation.png"), fullPage: false });
 
-  await page.goto(`${baseUrl}/admin/login`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/gsm-admin/login`, { waitUntil: "networkidle" });
   await page.locator("#admin-email").fill(process.env.ADMIN_EMAIL);
   await page.locator("#admin-password").fill(process.env.ADMIN_PASSWORD);
   await page.getByRole("button", { name: /Open lead desk/ }).click();
-  await page.waitForURL(`${baseUrl}/admin`, { timeout: 15000 });
+  await page.waitForURL(`${baseUrl}/gsm-admin`, { timeout: 15000 });
   await page.getByRole("heading", { name: "Lead pulse" }).waitFor();
   assert(await page.getByText(leadGenerationName, { exact: true }).isVisible(), "Lead Generation submission did not appear in the dashboard.");
   assert(await page.getByText(d2cGrowthName, { exact: true }).isVisible(), "D2C submission did not appear in the dashboard.");
   await page.screenshot({ path: path.join(outputDir, "admin-dashboard.png"), fullPage: true });
 
   await page.getByRole("link", { name: `View ${leadGenerationName}` }).click();
-  await page.waitForURL(new RegExp(`/admin/leads/${leadResult.leadId}$`));
+  await page.waitForURL(new RegExp(`/gsm-admin/leads/${leadResult.leadId}$`));
   await page.locator(".lead-status-select").selectOption("qualified");
   await page.getByLabel("Add an internal note").fill("Automated QA note: lead update works.");
   await page.getByRole("button", { name: /Save note/ }).click();
   await page.getByText(/lead update works/).waitFor();
 
-  await page.goto(`${baseUrl}/admin/questionnaire`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/gsm-admin/questionnaire`, { waitUntil: "networkidle" });
   await page.getByRole("heading", { name: "Questionnaire" }).waitFor();
   await page.getByRole("button", { name: "Add question" }).click();
   await page.getByLabel("Question key").fill("qa_temporary_question");

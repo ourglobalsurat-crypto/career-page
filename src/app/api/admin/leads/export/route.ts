@@ -9,7 +9,7 @@ export async function GET() {
     const sql = getSql();
     const rows = (await sql.query(
       `SELECT l.id, l.created_at, l.name, l.phone, l.email, l.city, l.language,
-              l.status, l.source, l.utm,
+              l.status, l.source, l.utm, l.position_title, l.screening, l.review_score,
               coalesce(jsonb_object_agg(la.question_key, la.answer)
                 FILTER (WHERE la.question_key IS NOT NULL), '{}'::jsonb) AS answers
        FROM leads l
@@ -19,7 +19,10 @@ export async function GET() {
     )) as Array<Record<string, unknown>>;
 
     const headers = [
-      "Lead ID",
+      "Application ID",
+      "Position",
+      "Preliminary screening",
+      "HR assessment (60)",
       "Received at (UTC)",
       "Name",
       "Phone",
@@ -36,7 +39,7 @@ export async function GET() {
     for (const row of rows) {
       lines.push(
         [
-          row.id,
+          row.id, row.position_title, JSON.stringify(row.screening), row.review_score,
           new Date(row.created_at as string | Date).toISOString(),
           row.name,
           row.phone,
@@ -57,7 +60,7 @@ export async function GET() {
     return new Response(`\uFEFF${lines.join("\r\n")}`, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="global-surat-leads-${date}.csv"`,
+        "Content-Disposition": `attachment; filename="global-surat-applications-${date}.csv"`,
         "Cache-Control": "no-store",
       },
     });

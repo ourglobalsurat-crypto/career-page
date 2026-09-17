@@ -21,7 +21,7 @@ export function ThankYouConversion({
   growthPath: GrowthPath | "general";
 }) {
   useEffect(() => {
-    const storageKey = `gs:generate-lead:${eventId}`;
+    const storageKey = `gs:submit-application:${eventId}`;
 
     if (emittedInDocument.has(eventId)) return;
 
@@ -37,15 +37,15 @@ export function ThankYouConversion({
 
     window.dataLayer = window.dataLayer ?? [];
     window.dataLayer.push({
-      event: "generate_lead",
+      event: "submit_application",
       event_id: eventId,
-      growth_path: growthPath,
+      position: growthPath,
     });
 
     if (typeof window.fbq === "function") {
       window.fbq(
-        "track",
-        "Lead",
+        "trackCustom",
+        "SubmitApplication",
         { content_category: growthPath },
         { eventID: eventId },
       );

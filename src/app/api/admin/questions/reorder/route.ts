@@ -5,7 +5,7 @@ import { getSql } from "@/lib/db";
 import { getDraftQuestionnaire } from "@/lib/questionnaire";
 import { isSameOrigin, jsonError } from "@/lib/security";
 
-const schema = z.object({ ids: z.array(z.string().uuid()).min(1).max(100) });
+const schema = z.object({ ids: z.array(z.string().uuid()).min(1).max(500) });
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError("Request origin was not accepted.", 403);
@@ -31,13 +31,6 @@ export async function POST(request: Request) {
     if (parsed.data.ids.length !== draftIds.size || parsed.data.ids.some((id) => !draftIds.has(id))) {
       return jsonError("Question list changed. Refresh and try again.", 409);
     }
-    const activeFlowSelector = draft.questions.find(
-      (question) => question.isActive && question.config.systemRole === "flow_selector",
-    );
-    if (activeFlowSelector && parsed.data.ids[0] !== activeFlowSelector.id) {
-      return jsonError("The service-path selector must remain the first question.", 400);
-    }
-
     const sql = getSql();
     const queries = parsed.data.ids.map((id, index) =>
       sql.query(

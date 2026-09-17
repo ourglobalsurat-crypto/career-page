@@ -1,5 +1,9 @@
 import { ArrowLeft, CalendarClock, Link2, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import {AttachmentPreview} from "@/components/attachment-preview";
+import {DeleteApplication} from "@/components/delete-application";
+import {requireAdmin} from "@/lib/auth";
+import {ScreeningReview} from "@/components/screening-review";
 import { notFound } from "next/navigation";
 
 import { LeadNoteForm } from "@/components/lead-note-form";
@@ -21,6 +25,7 @@ function displayAnswer(item: LeadAnswer) {
 }
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const admin = await requireAdmin();
   const { id } = await params;
   const lead = await getLeadDetail(id);
   if (!lead) notFound();
@@ -28,18 +33,18 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <main className="admin-page">
-      <Link className="admin-back-link" href="/admin/leads"><ArrowLeft size={16} /> Back to all leads</Link>
+      <Link className="admin-back-link" href="/gsm-admin/leads"><ArrowLeft size={16} /> Back to all applications</Link>
       <div className="lead-detail-heading">
-        <div><span className="admin-page-kicker">LEAD DETAIL</span><h1>{lead.name || "Unnamed lead"}</h1><p>Received {formatDate(lead.createdAt)}</p></div>
-        <LeadStatusControl id={lead.id} initialStatus={lead.status} />
+        <div><span className="admin-page-kicker">APPLICATION DETAIL</span><h1>{lead.name || "Unnamed applicant"}</h1><p>{lead.positionTitle} · Received {formatDate(lead.createdAt)}</p></div>
+        <div className="application-detail-actions"><LeadStatusControl id={lead.id} initialStatus={lead.status} />{admin.role !== "viewer" && <DeleteApplication id={lead.id} name={lead.name || "Unnamed applicant"} redirectAfter/>}</div>
       </div>
 
       <div className="lead-detail-grid">
         <div className="lead-detail-main">
           <section className="admin-card lead-answer-card">
-            <header><div><span className="admin-page-kicker">QUESTIONNAIRE</span><h2>Lead answers</h2></div></header>
+            <header><div><span className="admin-page-kicker">QUESTIONNAIRE</span><h2>Application answers</h2></div></header>
             <div className="answer-list">
-              {lead.answers.map((answer, index) => <article key={answer.id}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{answer.questionSnapshot.label.en || answer.questionKey}</h3><p>{displayAnswer(answer)}</p></div></article>)}
+              {lead.answers.map((answer, index) => <article key={answer.id}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{answer.questionSnapshot.label.en || answer.questionKey}</h3>{['file','image'].includes(answer.questionSnapshot.type) ? <AttachmentPreview id={String(answer.answer)} kind={answer.questionSnapshot.type === 'image' ? 'image' : 'file'}/> : answer.questionSnapshot.type === 'url' && /^https?:\/\//.test(String(answer.answer)) ? <a href={String(answer.answer)} target="_blank" rel="noopener noreferrer">{String(answer.answer)}</a> : <p style={{whiteSpace:'pre-wrap'}}>{displayAnswer(answer)}</p>}</div></article>)}
             </div>
           </section>
           <section className="admin-card notes-card">
@@ -52,7 +57,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           </section>
         </div>
 
-        <aside className="lead-detail-side">
+        <aside className="lead-detail-side"><ScreeningReview id={lead.id} screening={lead.screening} reviewScore={lead.reviewScore} />
           <section className="admin-card contact-card">
             <span className="admin-page-kicker">CONTACT</span>
             {lead.phone && <a href={`tel:${lead.phone}`}><Phone size={17} /><span><small>Phone</small><strong>{lead.phone}</strong></span></a>}

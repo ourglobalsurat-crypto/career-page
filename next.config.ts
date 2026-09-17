@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
+import { networkInterfaces } from 'node:os';
 
 const isProduction = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: Object.values(networkInterfaces()).flatMap(addresses =>
+    (addresses ?? []).filter(address => address.family === 'IPv4').map(address => address.address)),
   poweredByHeader: false,
   compress: true,
   async headers() {
@@ -37,7 +40,13 @@ const nextConfig: NextConfig = {
       });
     }
 
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/api/admin/resumes/:id", headers: [
+        {key:"X-Frame-Options",value:"SAMEORIGIN"},
+        {key:"Content-Security-Policy",value:"default-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"},
+      ]},
+    ];
   },
 };
 

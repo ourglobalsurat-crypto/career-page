@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import {screenApplication} from "@/lib/screening";
 
 import { getSql } from "@/lib/db";
 import { issueLeadReceipt } from "@/lib/lead-receipt";
@@ -118,10 +119,7 @@ export async function POST(request: Request) {
        JOIN forms f ON f.id = fv.form_id
        WHERE fv.id = $1
          AND f.id = $2
-         AND (
-           fv.status = 'published'
-           OR (fv.status = 'archived' AND fv.updated_at > now() - interval '24 hours')
-         )
+         AND fv.status = 'published' AND f.current_published_version_id = fv.id
        LIMIT 1`,
       [payload.versionId, payload.formId],
     )) as { id: string }[];
@@ -176,6 +174,13 @@ export async function POST(request: Request) {
     }
 
     const byKey = new Map(validatedAnswers.map((item) => [item.question.key, item.value]));
+    const attached=validatedAnswers.filter(({question})=>['file','image'].includes(question.type));
+    const uploads=await sql.query('SELECT id,mime_type FROM resume_uploads WHERE id=ANY($1::uuid[]) AND submission_token=$2',[attached.map(item=>item.value),payload.submissionToken]) as {id:string;mime_type:string}[];
+    for(const {question,value} of attached) {
+      const upload=uploads.find(upload=>upload.id===value);
+      const allowed=question.type==='image' ? ['image/jpeg','image/png','image/webp'] : ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if(!upload || !allowed.includes(upload.mime_type)) return Response.json({ok:false,message:`Please upload a valid ${question.type==='image'?'image':'résumé'} for this question.`,questionKey:question.key},{status:400});
+    }
     const valueForRole = (role: "contact_name" | "contact_phone", legacyKey: string) =>
       validatedAnswers.find((item) => item.question.config.systemRole === role)?.value
       ?? byKey.get(legacyKey);
@@ -197,14 +202,17 @@ export async function POST(request: Request) {
       gclid: attribution.gclid ?? "",
     };
 
+    const position = getSelectedGrowthPath(questions,payload.answers)!;
+    const positionTitle = questions.find(q => q.config.systemRole === 'flow_selector')?.options.find(o => o.id === position)?.label.en || position;
+    const screening = screenApplication(questions,payload.answers,position);
     const queries = [
       sql.query(
         `INSERT INTO leads (
           id, form_id, form_version_id, language, name, phone, email, city,
-          status, source, referrer, utm, consent_at, submission_token
+          status, source, referrer, utm, consent_at, submission_token, position_key, position_title, screening
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8,
-          'new', $9, $10, $11::jsonb, now(), $12
+          'new', $9, $10, $11::jsonb, now(), $12, $13, $14, $15::jsonb
         )`,
         [
           leadId,
@@ -218,7 +226,7 @@ export async function POST(request: Request) {
           attribution.utmSource || attribution.source || (attribution.fbclid ? "facebook" : "direct"),
           attribution.referrer || null,
           JSON.stringify(utm),
-          payload.submissionToken,
+          payload.submissionToken, position, positionTitle, JSON.stringify(screening),
         ],
       ),
       ...validatedAnswers.map(({ question, value }) =>

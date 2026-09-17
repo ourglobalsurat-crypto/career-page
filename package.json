@@ -1,5 +1,5 @@
 {
-  "name": "global-surat-lead-landing-page",
+  "name": "global-surat-careers",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,10 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "db:setup": "tsx scripts/setup-db.ts",
-    "db:publish-language-update": "tsx scripts/publish-language-update.ts",
-    "db:publish-branching-form": "tsx scripts/publish-branching-questionnaire.ts",
-    "qa:e2e": "node scripts/qa.mjs"
+    "db:setup": "tsx scripts/setup-db.ts && tsx scripts/setup-careers.ts",
+    "qa:e2e": "tsx scripts/qa-careers.ts && tsx scripts/qa-careers-browser.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -19,10 +17,12 @@
     "clsx": "^2.1.1",
     "jose": "^6.2.10",
     "lucide-react": "^1.34.0",
+    "mammoth": "^1.12.3",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "sharp": "^0.35.4",
+    "yauzl": "^3.4.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -30,6 +30,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/yauzl": "^3.4.0",
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",

@@ -42,7 +42,7 @@ Only after HR assessment is the total shown out of 100: 80+ Strong candidate, 60
 
 ## Résumé handling
 
-PDF, DOC and DOCX files up to 5 MB are validated and stored privately in Neon as binary data. An upload is bound to its application submission token. Only authenticated admins can download files, served as attachments with no-store headers. Files are not placed in `public/`. Unsubmitted uploads remain private; define a retention and cleanup schedule before deploying publicly.
+PDF, DOC and DOCX files up to 5 MB are validated and stored privately in Neon as binary data. An upload is bound to its application submission token. Only authenticated admins can preview or download files, with no-store headers. Files are not placed in `public/`. Unsubmitted uploads remain private; define a retention and cleanup schedule before deploying publicly.
 
 ## Validation
 
@@ -56,3 +56,11 @@ npm run qa:e2e
 Browser integration tests require the local server on port 3000. They use installed Edge on Windows, or Playwright Chromium elsewhere. Tests create and remove synthetic applications; the browser test also publishes the restored questionnaire draft. Run them against the isolated development database only. Screenshots and the integration summary are in ignored `artifacts/`.
 
 The application is running locally with a cloud Neon database. Production hosting, résumé retention policy, translated hiring copy, and any custom screening rubric remain separate configuration choices.
+
+## Attachment controls and application deletion
+
+- Applicants see a prominent upload area with drag-and-drop, a choose-file button, accepted formats, size limit, progress, and change/remove controls. Navigation waits for uploads to finish.
+- In Admin > Questionnaire, add a question and select **Image upload** as the answer type. Choose the position, required/optional setting, save, and publish. Images support JPG, PNG and WebP up to 5 MB and 25 megapixels. Images are decoded and re-encoded to validate them and remove EXIF metadata.
+- Application details offer private PDF and image previews, DOCX text previews, and original-file downloads. Older DOC files use download only. DOCX archive expansion is bounded before text extraction; previews never use third-party services.
+- Owners and editors can delete applications from the list or detail page after confirming. Deletion removes answers, notes, and all files associated with that application token in one database statement, retaining an audit event. Viewers cannot delete.
+- Targeted verification: set QA_BASE_URL to http://127.0.0.1:5000 and run `npx tsx scripts/qa-attachments.ts`. This creates and removes a synthetic application without publishing questionnaire changes.

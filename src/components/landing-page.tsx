@@ -18,14 +18,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import {ApplicationUpload} from "@/components/application-upload";
+import { browserUuid } from '@/lib/browser-uuid';
+import { FormEvent, useState } from "react";
 
 import {
-  languageNames,
-  languageNativeLabels,
   marqueeItems,
   processSteps,
-  services,
   siteCopy,
   text,
 } from "@/lib/copy";
@@ -35,8 +34,6 @@ import {
   pruneHiddenAnswers,
 } from "@/lib/questionnaire-flow";
 import {
-  growthPaths,
-  locales,
   type Locale,
   type PublicQuestion,
   type PublicQuestionnaire,
@@ -49,64 +46,32 @@ type AnswerMap = Record<string, unknown>;
 const serviceIcons: LucideIcon[] = [Megaphone, ShoppingBag, Images, Store, Search];
 const MAIN_WEBSITE_URL = "https://globalsurat.com/";
 
-const faqs = [
-  {
-    q: {
-      en: "Do I need to understand digital marketing?",
-      hi: "क्या मुझे digital marketing समझना ज़रूरी है?",
-      gu: "શું મને digital marketing સમજવું જરૂરી છે?",
-    },
-    a: {
-      en: "Not at all. Tell us what result you want in normal words. We’ll explain the useful options without jargon.",
-      hi: "बिल्कुल नहीं। आपको जो result चाहिए, वह आसान शब्दों में बताइए। उपयोगी options हम मुश्किल jargon के बिना समझाएँगे।",
-      gu: "બિલકુલ નહીં. તમને જે result જોઈએ તે સરળ શબ્દોમાં કહો. ઉપયોગી options અમે મુશ્કેલ jargon વગર સમજાવીશું.",
-    },
-  },
-  {
-    q: {
-      en: "Is this 2-minute check free?",
-      hi: "क्या यह 2-minute check free है?",
-      gu: "શું આ 2-minute check free છે?",
-    },
-    a: {
-      en: "Yes. Sharing your needs and the first conversation are free. We only discuss pricing after we understand the work.",
-      hi: "हाँ। अपनी ज़रूरत बताना और पहली बातचीत free है। काम समझने के बाद ही pricing पर बात होगी।",
-      gu: "હા. તમારી જરૂરિયાત જણાવવી અને પહેલી વાતચીત free છે. કામ સમજ્યા પછી જ pricing વિશે વાત થશે.",
-    },
-  },
-  {
-    q: {
-      en: "What happens after I submit?",
-      hi: "Submit करने के बाद क्या होगा?",
-      gu: "Submit કર્યા પછી શું થશે?",
-    },
-    a: {
-      en: "A person from our Surat team reviews your answers, then calls or WhatsApps you with a practical next step. There is no pressure to buy.",
-      hi: "हमारी सूरत team आपके जवाब देखकर उपयोगी अगले कदम के साथ call या WhatsApp करेगी। खरीदने का कोई दबाव नहीं।",
-      gu: "અમારી સુરત team તમારા જવાબ જોઈને ઉપયોગી આગળના પગલા સાથે call અથવા WhatsApp કરશે. ખરીદીનું કોઈ દબાણ નહીં.",
-    },
-  },
-] as const;
+const faqs = [{"q": {"en": "Where will I work?", "hi": "", "gu": ""}, "a": {"en": "These positions are based at our Surat office. Tell us in the application whether you can work from Surat or need to discuss relocation.", "hi": "", "gu": ""}}, {"q": {"en": "What should I prepare?", "hi": "", "gu": ""}, "a": {"en": "Keep your résumé (PDF, DOC or DOCX, up to 5 MB), measurable results and work links ready. A portfolio is required for Graphic Designer and Video Editor applicants.", "hi": "", "gu": ""}}, {"q": {"en": "What happens after I apply?", "hi": "", "gu": ""}, "a": {"en": "Our hiring team reviews your application against the role. If there is a fit, we contact you to discuss an interview. Submitting an application does not guarantee an interview.", "hi": "", "gu": ""}}];
 
 function optionDescription(option: QuestionOption, locale: Locale) {
   return option.description ? text(option.description, locale) : "";
 }
 
 function QuestionControl({
+  submissionToken,
+  onBusyChange,
   question,
   locale,
   value,
   onChange,
 }: {
+  submissionToken: string;
+  onBusyChange: (busy: boolean) => void;
   question: PublicQuestion;
   locale: Locale;
   value: unknown;
   onChange: (value: unknown) => void;
 }) {
   const labelledBy = "question-heading";
+  if (question.type === 'file' || question.type === 'image') return <ApplicationUpload kind={question.type === 'image' ? 'image' : 'resume'} value={value} submissionToken={submissionToken} onChange={onChange} onBusyChange={onBusyChange}/>;
   const textValue = typeof value === "string" || typeof value === "number" ? String(value) : "";
 
-  if (["short_text", "email", "phone", "number", "date"].includes(question.type)) {
+  if (["short_text", "email", "phone", "number", "date", "url"].includes(question.type)) {
     const type =
       question.type === "short_text"
         ? "text"
@@ -119,7 +84,7 @@ function QuestionControl({
         type={type}
         value={textValue}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={text(question.placeholder, locale)}
+        placeholder={text(question.placeholder, locale) || (question.type === 'phone' ? '9876543210 or +91 9876543210' : question.type === 'email' ? 'you@example.com' : question.type === 'url' ? 'https://example.com/your-work' : '')}
         aria-labelledby={labelledBy}
         inputMode={question.type === "phone" ? "tel" : question.type === "number" ? "numeric" : undefined}
         autoComplete={
@@ -133,7 +98,7 @@ function QuestionControl({
                   ? "address-level2"
                   : "off"
         }
-        maxLength={question.config.maxLength}
+        maxLength={question.config.maxLength ?? (question.type === 'phone' ? 25 : undefined)}
         min={question.config.min}
         max={question.config.max}
       />
@@ -269,11 +234,9 @@ function QuestionControl({
 function GrowthCheck({
   questionnaire,
   locale,
-  onLocaleChange,
 }: {
   questionnaire: PublicQuestionnaire;
   locale: Locale;
-  onLocaleChange: (locale: Locale) => void;
 }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<AnswerMap>({});
@@ -281,22 +244,14 @@ function GrowthCheck({
   const [honeypot, setHoneypot] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading,setIsUploading] = useState(false);
   const [startedAt] = useState(() => Date.now());
-  const [submissionToken] = useState(() => crypto.randomUUID());
+  const [submissionToken] = useState(browserUuid);
   const questions = getVisibleQuestions(questionnaire.questions, answers);
   const currentQuestion = questions[step];
   const isLast = step === questions.length - 1;
   const selectedGrowthPath = getSelectedGrowthPath(questionnaire.questions, answers);
-  const expectedQuestionCount = selectedGrowthPath
-    ? questions.length
-    : Math.max(
-        questions.length,
-        ...growthPaths.map((growthPath) =>
-          questionnaire.questions.filter(
-            (question) => !question.config.flow || question.config.flow === growthPath,
-          ).length,
-        ),
-      );
+  const expectedQuestionCount = selectedGrowthPath ? questions.length : 0;
   const progress = expectedQuestionCount ? ((step + 1) / expectedQuestionCount) * 100 : 0;
 
   const moveFocus = () => {
@@ -307,7 +262,7 @@ function GrowthCheck({
     if (!currentQuestion) return false;
     const result = validateQuestionAnswer(currentQuestion, answers[currentQuestion.key]);
     if (!result.ok) {
-      setError(text(siteCopy.requiredError, locale));
+      setError(result.message);
       return false;
     }
     setError("");
@@ -315,7 +270,7 @@ function GrowthCheck({
   }
 
   function nextStep() {
-    if (!validateCurrent()) return;
+    if (isUploading || !validateCurrent()) return;
     setStep((current) => Math.min(current + 1, questions.length - 1));
     moveFocus();
   }
@@ -328,7 +283,7 @@ function GrowthCheck({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!validateCurrent()) return;
+    if (isUploading || !validateCurrent()) return;
     if (!consent) {
       setError(text(siteCopy.consentError, locale));
       return;
@@ -396,21 +351,13 @@ function GrowthCheck({
     <form onSubmit={submit} className="growth-form" noValidate>
       <div className="form-topline">
         <span className="form-kicker">{text(siteCopy.formKicker, locale)}</span>
-        <span className="step-count">{String(step + 1).padStart(2, "0")} / {String(expectedQuestionCount).padStart(2, "0")}</span>
+        {selectedGrowthPath && <span className="step-count">{String(step + 1).padStart(2, "0")} / {String(expectedQuestionCount).padStart(2, "0")}</span>}
       </div>
-      <div className="progress-track" aria-label={`Question ${step + 1} of ${expectedQuestionCount}`} role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={expectedQuestionCount}>
+      {selectedGrowthPath && <div className="progress-track" aria-label={`Question ${step + 1} of ${expectedQuestionCount}`} role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={expectedQuestionCount}>
         <span style={{ width: `${progress}%` }} />
-      </div>
+      </div>}
 
-      <div className="form-language-mobile" aria-label="Choose language">
-        {locales.map((item) => (
-          <button key={item} type="button" aria-pressed={locale === item} className={locale === item ? "active" : ""} onClick={() => onLocaleChange(item)}>
-            {languageNames[item]}
-          </button>
-        ))}
-      </div>
-
-      <fieldset className="question-fieldset">
+      <fieldset disabled={isSubmitting} className="question-fieldset" aria-invalid={Boolean(error)} aria-describedby={error ? 'question-error' : undefined}>
         <legend className="sr-only">{text(currentQuestion.label, locale)}</legend>
         <div className="question-heading-wrap">
           <span className="question-number">Q{String(step + 1).padStart(2, "0")}</span>
@@ -421,7 +368,7 @@ function GrowthCheck({
           </div>
         </div>
 
-        <QuestionControl
+        <QuestionControl onBusyChange={setIsUploading} key={currentQuestion.id} submissionToken={submissionToken}
           question={currentQuestion}
           locale={locale}
           value={answers[currentQuestion.key]}
@@ -450,18 +397,18 @@ function GrowthCheck({
         </label>
       )}
 
-      {error && <p className="form-error" role="alert">{error}</p>}
+      {error && <p id="question-error" className="form-error" role="alert">{error}</p>}
 
       <div className="form-actions">
-        <button className="button button-secondary" type="button" onClick={previousStep} disabled={step === 0 || isSubmitting}>
+        <button className="button button-secondary" type="button" onClick={previousStep} disabled={step === 0 || isSubmitting || isUploading}>
           <ArrowLeft size={18} /> {text(siteCopy.back, locale)}
         </button>
         {isLast ? (
-          <button className="button button-primary form-submit" type="submit" disabled={isSubmitting}>
+          <button className="button button-primary form-submit" type="submit" disabled={isSubmitting || isUploading}>
             {isSubmitting ? text(siteCopy.saving, locale) : text(siteCopy.submit, locale)} <ArrowRight size={18} />
           </button>
         ) : (
-          <button className="button button-primary" type="button" onClick={nextStep}>
+          <button className="button button-primary" type="button" onClick={nextStep} disabled={isUploading}>
             {text(siteCopy.next, locale)} <ArrowRight size={18} />
           </button>
         )}
@@ -472,17 +419,18 @@ function GrowthCheck({
 }
 
 export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionnaire }) {
-  const [locale, setLocale] = useState<Locale>("en");
+  const locale: Locale = "en";
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : "#growth-check";
-  const activeCopy = useMemo(() => ({
+  const services = questionnaire.questions.find(q => q.config.systemRole === 'flow_selector')?.options.map((option,index) => ({
+    number: String(index+1).padStart(2,'0'), title: option.label,
+    body: option.description || {en:'Bring your hands-on experience and show us the work you are proud of.',hi:'',gu:''},
+    technical: 'Surat office · Apply below'
+  })) || [];
+  const activeCopy = {
     body: text(siteCopy.heroBody, locale),
     cta: text(siteCopy.primaryCta, locale),
-  }), [locale]);
-
-  useEffect(() => {
-    document.documentElement.lang = locale === "gu" ? "gu-IN" : locale === "hi" ? "hi-IN" : "en-IN";
-  }, [locale]);
+  };
 
   function startGrowthCheck() {
     const formSection = document.getElementById("growth-check");
@@ -526,13 +474,6 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
           >
             {text(siteCopy.mainWebsite, locale)} <ExternalLink size={14} />
           </a>
-          <div className="language-switch" role="group" aria-label="Choose page language">
-            {locales.map((item) => (
-              <button key={item} type="button" aria-pressed={locale === item} className={locale === item ? "active" : ""} onClick={() => setLocale(item)}>
-                {languageNames[item]}
-              </button>
-            ))}
-          </div>
           <button className="header-cta" type="button" onClick={startGrowthCheck} aria-controls="growth-check" data-cta-location="navbar">
             {text(siteCopy.navCta, locale)} <ArrowRight size={16} />
           </button>
@@ -562,19 +503,15 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
               </button>
             )}
           </div>
-          <div className="trust-row" aria-label="Why people choose this check">
+          <div className="trust-row" aria-label="Why join our team">
             <span><Check size={15} /> {text(siteCopy.noJargon, locale)}</span>
             <span><Check size={15} /> {text(siteCopy.freeCall, locale)}</span>
             <span><Check size={15} /> {text(siteCopy.localTeam, locale)}</span>
           </div>
-          <div className="language-note">
-            <strong>{languageNativeLabels[locale]}</strong>
-            <span>{text(siteCopy.languageAvailability, locale)}</span>
-          </div>
         </div>
 
         <div id="growth-check" className="form-column">
-          <div className="form-accent" aria-hidden="true"><span>2 MIN</span><span>FREE CHECK</span></div>
+          <div className="form-accent" aria-hidden="true"><span>CAREERS</span><span>JOIN US</span></div>
           <div className="form-card">
             <div className="form-intro">
               <div>
@@ -583,12 +520,12 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
               </div>
               <p>{text(siteCopy.formIntro, locale)}</p>
             </div>
-            <GrowthCheck questionnaire={questionnaire} locale={locale} onLocaleChange={setLocale} />
+            <GrowthCheck questionnaire={questionnaire} locale={locale} />
           </div>
         </div>
       </section>
 
-      <section className="marquee-strip" aria-label="Global Surat service outcomes">
+      <section className="marquee-strip" aria-label="Career opportunities at Global Surat">
         <span className="sr-only">{marqueeItems.map((item) => text(item, locale)).join(" · ")}</span>
         <div className="marquee-track" aria-hidden="true">
           {[0, 1].map((copyIndex) => (
@@ -609,13 +546,16 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
         </div>
         <div className="services-grid">
           {services.map((service, index) => {
-            const Icon = serviceIcons[index];
+            const Icon = serviceIcons[index % serviceIcons.length];
             return (
               <article className="service-card" key={service.number}>
                 <div className="service-card-top"><span>{service.number}</span><Icon size={27} strokeWidth={1.8} /></div>
                 <h3>{text(service.title, locale)}</h3>
                 <p>{text(service.body, locale)}</p>
-                <small>{service.technical}</small>
+                <div className="role-card-footer">
+                  <small>Surat office</small>
+                  <button className="text-link" type="button" onClick={startGrowthCheck}>Apply now <ArrowRight size={16} /></button>
+                </div>
               </article>
             );
           })}
@@ -698,7 +638,7 @@ export function LandingPage({ questionnaire }: { questionnaire: PublicQuestionna
         <div>
           <span>© {new Date().getFullYear()} Global Surat</span>
           <a href={MAIN_WEBSITE_URL} target="_blank" rel="noopener noreferrer">{text(siteCopy.websiteShort, locale)} ↗</a>
-          <a href="/admin/login">Admin</a>
+          <a href="/gsm-admin/login">Admin</a>
         </div>
       </footer>
 

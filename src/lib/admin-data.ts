@@ -4,6 +4,10 @@ import { getSql } from "@/lib/db";
 import type { LeadDetail, LeadListItem, LeadStatus, Locale } from "@/lib/types";
 
 type LeadRow = {
+  position_key: string | null;
+  position_title: string | null;
+  screening: import("./screening").Screening | null;
+  review_score: number | null;
   id: string;
   name: string | null;
   phone: string | null;
@@ -18,6 +22,7 @@ type LeadRow = {
 function toLead(row: LeadRow): LeadListItem {
   return {
     id: row.id,
+    positionKey:row.position_key, positionTitle:row.position_title, screening:row.screening, reviewScore:row.review_score,
     name: row.name,
     phone: row.phone,
     email: row.email,
@@ -41,7 +46,7 @@ export async function getDashboardData() {
        FROM leads`,
     ),
     sql.query(
-      `SELECT id, name, phone, email, city, language, status, source, created_at
+      `SELECT id, name, phone, email, city, language, status, source, position_key, position_title, screening, review_score, created_at
        FROM leads ORDER BY created_at DESC LIMIT 7`,
     ),
     sql.query(
@@ -90,9 +95,13 @@ export async function getDashboardData() {
 export async function getLeads({
   search = "",
   status = "",
+  position = "",
+  page = 1,
 }: {
   search?: string;
   status?: string;
+  position?: string;
+  page?: number;
 }) {
   const sql = getSql();
   const clauses: string[] = [];
@@ -103,6 +112,7 @@ export async function getLeads({
     clauses.push(`status = $${params.length}`);
   }
 
+  if(position) {params.push(position.slice(0,80));clauses.push(`position_key = $${params.length}`);}
   const normalizedSearch = search.trim().slice(0, 100);
   if (normalizedSearch) {
     params.push(`%${normalizedSearch}%`);
@@ -110,17 +120,19 @@ export async function getLeads({
       `(coalesce(name, '') ILIKE $${params.length}
         OR coalesce(phone, '') ILIKE $${params.length}
         OR coalesce(email, '') ILIKE $${params.length}
+        OR coalesce(position_title, '') ILIKE $${params.length}
         OR coalesce(city, '') ILIKE $${params.length})`,
     );
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+  params.push((Math.max(1,Math.floor(page))-1)*50);
   const rows = (await sql.query(
-    `SELECT id, name, phone, email, city, language, status, source, created_at
+    `SELECT id, name, phone, email, city, language, status, source, position_key, position_title, screening, review_score, created_at
      FROM leads
      ${where}
      ORDER BY created_at DESC
-     LIMIT 250`,
+     LIMIT 51 OFFSET $${params.length}`,
     params,
   )) as LeadRow[];
 
@@ -130,7 +142,7 @@ export async function getLeads({
 export async function getLeadDetail(id: string): Promise<LeadDetail | null> {
   const sql = getSql();
   const rows = (await sql.query(
-    `SELECT id, name, phone, email, city, language, status, source,
+    `SELECT id, name, phone, email, city, language, status, source, position_key, position_title, screening, review_score,
             referrer, utm, consent_at, created_at
      FROM leads WHERE id = $1 LIMIT 1`,
     [id],

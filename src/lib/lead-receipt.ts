@@ -5,13 +5,13 @@ import { createHash, createHmac } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-import { growthPaths, locales, type GrowthPath, type Locale } from "@/lib/types";
+import { locales, type GrowthPath, type Locale } from "@/lib/types";
+import {isGrowthPath} from '@/lib/careers-flow';
 
 const COOKIE_NAME = "gs_lead_receipt";
 const RECEIPT_ISSUER = "global-surat-leads";
 const RECEIPT_AUDIENCE = "global-surat-thank-you";
 const RECEIPT_TTL_SECONDS = 15 * 60;
-const receiptGrowthPaths: readonly ReceiptGrowthPath[] = [...growthPaths, "general"];
 
 export type ReceiptGrowthPath = GrowthPath | "general";
 
@@ -47,10 +47,6 @@ function eventIdForLead(leadId: string) {
 
 function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && locales.includes(value as Locale);
-}
-
-function isGrowthPath(value: unknown): value is ReceiptGrowthPath {
-  return typeof value === "string" && receiptGrowthPaths.includes(value as ReceiptGrowthPath);
 }
 
 async function createLeadReceipt(

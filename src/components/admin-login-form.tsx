@@ -27,7 +27,7 @@ export function AdminLoginForm() {
         setError(result.message || "Could not sign in.");
         return;
       }
-      router.replace("/admin");
+      router.replace("/gsm-admin");
       router.refresh();
     } catch {
       setError("Could not connect. Please try again.");
@@ -54,7 +54,7 @@ export function AdminLoginForm() {
       </div>
       {error && <p className="admin-form-error" role="alert">{error}</p>}
       <button className="admin-submit" type="submit" disabled={isLoading}>
-        {isLoading ? "Signing in..." : "Open lead desk"} <ArrowRight size={18} />
+        {isLoading ? "Signing in..." : "Open hiring desk"} <ArrowRight size={18} />
       </button>
     </form>
   );

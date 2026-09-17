@@ -4,7 +4,7 @@ export type Locale = (typeof locales)[number];
 export type LocalizedText = Record<Locale, string>;
 
 export const growthPaths = ["lead_generation", "d2c_growth"] as const;
-export type GrowthPath = (typeof growthPaths)[number];
+export type GrowthPath = string;
 
 export const systemQuestionRoles = [
   "flow_selector",
@@ -23,6 +23,9 @@ export const questionTypes = [
   "multi_choice",
   "dropdown",
   "yes_no",
+  "url",
+  "file",
+  "image",
   "date",
   "rating",
 ] as const;
@@ -82,8 +85,13 @@ export const leadStatuses = [
 ] as const;
 
 export type LeadStatus = (typeof leadStatuses)[number];
+export const leadStatusLabels: Record<LeadStatus,string> = {new:'New',contacted:'Interview',qualified:'Shortlisted',won:'Hired',not_interested:'Archived'};
 
 export type LeadListItem = {
+  positionKey: string | null;
+  positionTitle: string | null;
+  screening: import("./screening").Screening | null;
+  reviewScore: number | null;
   id: string;
   name: string | null;
   phone: string | null;

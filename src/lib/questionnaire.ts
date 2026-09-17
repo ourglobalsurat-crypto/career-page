@@ -60,7 +60,7 @@ export async function getPublishedQuestionnaire(): Promise<PublicQuestionnaire> 
        JOIN form_versions fv ON fv.id = f.current_published_version_id
        WHERE f.slug = $1 AND fv.status = 'published'
        LIMIT 1`,
-      ["growth-check"],
+      ["careers"],
     )) as FormRow[];
 
     const form = forms[0];
@@ -99,7 +99,7 @@ export async function getDraftQuestionnaire(): Promise<PublicQuestionnaire | nul
      WHERE f.slug = $1 AND fv.status = 'draft'
      ORDER BY fv.version_number DESC
      LIMIT 1`,
-    ["growth-check"],
+    ["careers"],
   )) as FormRow[];
 
   const form = forms[0];

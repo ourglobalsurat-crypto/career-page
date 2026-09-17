@@ -16,12 +16,6 @@ type ExistingQuestionRow = {
   is_active: boolean;
 };
 
-function sameOptionStructure(left: QuestionOption[], right: QuestionOption[]) {
-  return (
-    left.length === right.length &&
-    left.every((option, index) => option.id === right[index]?.id)
-  );
-}
 
 export async function PATCH(
   request: Request,
@@ -43,8 +37,8 @@ export async function PATCH(
   const parsed = questionPayloadSchema.safeParse(body);
   if (!parsed.success) return jsonError(parsed.error.issues[0]?.message ?? "Check the question fields.", 400);
   const question = parsed.data;
-  if (choiceTypes.has(question.type) && question.options.length < 2) {
-    return jsonError("Choice questions need at least two options.", 400);
+  if (choiceTypes.has(question.type) && question.options.length < 1) {
+    return jsonError("Choice questions need at least one option.", 400);
   }
 
   try {
@@ -81,15 +75,7 @@ export async function PATCH(
         );
       }
 
-      if (
-        existingRole === "flow_selector" &&
-        !sameOptionStructure(existing.options ?? [], question.options)
-      ) {
-        return jsonError(
-          "The Lead Generation and D2C selector options cannot be added, removed, reordered, or replaced.",
-          400,
-        );
-      }
+
     }
 
     const savedConfig: QuestionConfig = existingRole

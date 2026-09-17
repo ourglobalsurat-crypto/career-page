@@ -118,6 +118,6 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 
 export async function requireAdmin() {
   const admin = await getAdminSession();
-  if (!admin) redirect("/admin/login");
+  if (!admin) redirect("/gsm-admin/login");
   return admin;
 }

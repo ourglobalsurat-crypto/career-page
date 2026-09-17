@@ -17,8 +17,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import { languageNames } from "@/lib/copy";
+import { browserUuid } from '@/lib/browser-uuid';
 import {
-  locales,
   questionTypes,
   type GrowthPath,
   type Locale,
@@ -38,6 +38,9 @@ const typeLabels: Record<QuestionType, string> = {
   multi_choice: "Checkboxes",
   dropdown: "Dropdown",
   yes_no: "Yes / No",
+  url: "Website / portfolio URL",
+  file: "Résumé upload",
+  image: "Image upload",
   date: "Date",
   rating: "Rating",
 };
@@ -45,13 +48,13 @@ const typeLabels: Record<QuestionType, string> = {
 const choiceTypes = new Set<QuestionType>(["single_choice", "multi_choice", "dropdown"]);
 
 const flowLabels: Record<"all" | GrowthPath, string> = {
-  all: "Both paths",
+  all: "All positions",
   lead_generation: "Lead Generation",
   d2c_growth: "D2C Growth",
 };
 
 function questionFlowLabel(question: PublicQuestion) {
-  return flowLabels[question.config.flow ?? "all"];
+  return flowLabels[question.config.flow ?? "all"] || question.config.flow;
 }
 
 function blankLocalized() {
@@ -60,7 +63,7 @@ function blankLocalized() {
 
 function makeOption(index: number): QuestionOption {
   return {
-    id: `option_${crypto.randomUUID().slice(0, 8)}`,
+    id: `option_${browserUuid().slice(0, 8)}`,
     label: { en: `Option ${index}`, hi: "", gu: "" },
     description: blankLocalized(),
   };
@@ -86,10 +89,11 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
   const router = useRouter();
   const [questions, setQuestions] = useState(questionnaire.questions);
   const [editing, setEditing] = useState<PublicQuestion | null>(null);
-  const [editorLocale, setEditorLocale] = useState<Locale>("en");
+  const editorLocale: Locale = "en";
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState("");
+  const [roleFilter,setRoleFilter] = useState("all");
   const [notice, setNotice] = useState("");
   const editingIsSystemQuestion = Boolean(editing?.config.systemRole);
   const editingIsFlowSelector = editing?.config.systemRole === "flow_selector";
@@ -101,7 +105,6 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
   function openEditor(question?: PublicQuestion) {
     setError("");
     setNotice("");
-    setEditorLocale("en");
     setEditing(question ? structuredClone(question) : makeQuestion(questions.length + 1));
   }
 
@@ -194,7 +197,7 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
       setError("Core form questions cannot be deleted. You can still edit their wording.");
       return;
     }
-    if (!window.confirm(`Delete “${question.label.en || question.key}” from the draft? Existing submitted leads will not be affected.`)) return;
+    if (!window.confirm(`Delete “${question.label.en || question.key}” from the draft? Existing applications will not be affected.`)) return;
     const response = await fetch(`/api/admin/questions/${question.id}`, { method: "DELETE" });
     if (response.ok) {
       setQuestions((current) => current.filter((item) => item.id !== question.id));
@@ -213,7 +216,7 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
       questions[index].config.systemRole === "flow_selector" ||
       questions[target].config.systemRole === "flow_selector"
     ) {
-      setError("The service-path selector must stay as the first question.");
+      setError("The position selector must stay before role questions.");
       return;
     }
     const reordered = [...questions];
@@ -247,9 +250,11 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
   return (
     <>
       <div className="builder-toolbar">
+          <button className="admin-button secondary" onClick={() => openEditor(questions.find(q => q.config.systemRole === 'flow_selector'))}>Manage positions</button>
+          <select aria-label="Filter questions by position" value={roleFilter} onChange={e=>setRoleFilter(e.target.value)}><option value="all">All questions</option><option value="shared">Shared questions</option>{questions.find(q=>q.config.systemRole==='flow_selector')?.options.map(o=><option key={o.id} value={o.id}>{o.label.en}</option>)}</select>
         <div>
           <span className="draft-badge"><span /> DRAFT VERSION {questionnaire.version}</span>
-          <p>Edits stay private until you publish. Old lead answers keep their original question text.</p>
+          <p>Edits stay private until you publish. Existing application answers keep their original question text.</p>
         </div>
         <div>
           <a className="admin-button secondary" href="/contact" target="_blank" rel="noopener noreferrer"><Eye size={17} /> View published form</a>
@@ -264,7 +269,7 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
       <div className="builder-list">
         <div className="builder-list-head"><span>Order</span><span>Question</span><span>Type</span><span>Required</span><span>Actions</span></div>
         {questions.map((question, index) => (
-          <article className={question.isActive ? "builder-row" : "builder-row inactive"} key={question.id}>
+          <article className={question.isActive ? "builder-row" : "builder-row inactive"} key={question.id} hidden={roleFilter !== "all" && (roleFilter === "shared" ? Boolean(question.config.flow) : question.config.flow !== roleFilter)}>
             <div className="builder-order">
               <GripVertical size={18} />
               <strong>{String(index + 1).padStart(2, "0")}</strong>
@@ -275,7 +280,7 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
             </div>
             <button className="builder-question" type="button" onClick={() => openEditor(question)}>
               <strong>{question.label.en || "Untitled question"}</strong>
-              <small>{questionFlowLabel(question)} · {question.config.systemRole ? "Core question" : "Editable question"} · {question.key} · {question.label.hi ? "HI" : "No HI"} · {question.label.gu ? "GU" : "No GU"}</small>
+              <small>{questionFlowLabel(question)} · {question.config.systemRole ? "Core question" : "Editable question"} · {question.key}</small>
             </button>
             <span className="question-type-pill">{typeLabels[question.type]}</span>
             <span className={question.required ? "required-yes" : "required-no"}>{question.required ? "Yes" : "No"}</span>
@@ -286,7 +291,7 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
           </article>
         ))}
         {questions.length === 0 && (
-          <div className="builder-empty"><CopyPlus size={32} /><h3>No questions yet</h3><p>Add your first question to start building the lead form.</p><button className="admin-button primary" onClick={() => openEditor()}><Plus size={17} /> Add question</button></div>
+          <div className="builder-empty"><CopyPlus size={32} /><h3>No questions yet</h3><p>Add your first question to start building the application form.</p><button className="admin-button primary" onClick={() => openEditor()}><Plus size={17} /> Add question</button></div>
         )}
       </div>
 
@@ -301,29 +306,26 @@ export function QuestionnaireBuilder({ questionnaire }: { questionnaire: PublicQ
               <div className="editor-settings-grid">
                 <label>Question key<input value={editing.key} disabled={editingIsSystemQuestion} title={editingIsSystemQuestion ? "The internal key is fixed for this core question" : undefined} onChange={(event) => setEditing({ ...editing, key: event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })} required pattern="[a-z0-9_]+" /></label>
                 <label>Answer type<select value={editing.type} disabled={editingIsSystemQuestion} title={editingIsSystemQuestion ? "The answer type is fixed for this core question" : undefined} onChange={(event) => changeType(event.target.value as QuestionType)}>{questionTypes.map((type) => <option key={type} value={type}>{typeLabels[type]}</option>)}</select></label>
-                <label>Form path<select value={editing.config.flow ?? "all"} disabled={editingIsSystemQuestion} title={editingIsSystemQuestion ? "Core questions are shared by both paths" : undefined} onChange={(event) => changeFlow(event.target.value as "all" | GrowthPath)}><option value="all">Both paths</option><option value="lead_generation">Lead Generation only</option><option value="d2c_growth">D2C Growth only</option></select></label>
+                <label>Position<select value={editing.config.flow ?? "all"} disabled={editingIsSystemQuestion} title={editingIsSystemQuestion ? "Core questions are shared by all positions" : undefined} onChange={(event) => changeFlow(event.target.value as "all" | GrowthPath)}><option value="all">All positions</option>{questions.find(q => q.config.systemRole === "flow_selector")?.options.map(option => <option key={option.id} value={option.id}>{option.label.en}</option>)}</select></label>
                 <label className="editor-check"><input type="checkbox" checked={editing.required} disabled={editingIsSystemQuestion} onChange={(event) => setEditing({ ...editing, required: event.target.checked })} /><span><Check size={13} /></span> Required answer</label>
                 <label className="editor-check"><input type="checkbox" checked={editing.isActive} disabled={editingIsSystemQuestion} onChange={(event) => setEditing({ ...editing, isActive: event.target.checked })} /><span><Check size={13} /></span> Show on form</label>
               </div>
 
-              <div className="editor-language-tabs" role="tablist" aria-label="Question language">
-                {locales.map((locale) => <button type="button" key={locale} role="tab" aria-selected={editorLocale === locale} className={editorLocale === locale ? "active" : ""} onClick={() => setEditorLocale(locale)}>{languageNames[locale]} {locale === "en" && "*"}</button>)}
-              </div>
-
+              {["file","image"].includes(editing.type) && <p className="preview-message">{editing.type === "image" ? "Applicants can upload one JPG, PNG or WebP image (maximum 5 MB)." : "Applicants can upload one PDF, DOC or DOCX r\u00e9sum\u00e9 (maximum 5 MB)."}</p>}
               <div className="editor-copy-fields">
                 <label>Question text <span>{languageNames[editorLocale]}</span><textarea rows={2} value={editing.label[editorLocale]} onChange={(event) => updateLocalized("label", event.target.value)} required={editorLocale === "en"} placeholder="Write the question in simple language" /></label>
                 <label>Small help text <span>Optional</span><textarea rows={2} value={editing.helpText[editorLocale]} onChange={(event) => updateLocalized("helpText", event.target.value)} placeholder="A short explanation below the question" /></label>
-                {!choiceTypes.has(editing.type) && !["yes_no", "rating"].includes(editing.type) && <label>Input placeholder <span>Optional</span><input value={editing.placeholder[editorLocale]} onChange={(event) => updateLocalized("placeholder", event.target.value)} placeholder="Example answer shown inside the field" /></label>}
+                {!choiceTypes.has(editing.type) && !["yes_no", "rating", "file", "image"].includes(editing.type) && <label>Input placeholder <span>Optional</span><input value={editing.placeholder[editorLocale]} onChange={(event) => updateLocalized("placeholder", event.target.value)} placeholder="Example answer shown inside the field" /></label>}
               </div>
 
               {choiceTypes.has(editing.type) && (
                 <div className="editor-options">
-                  <div className="editor-section-title"><div><h3>Answer options</h3><p>{editingIsFlowSelector ? `Edit the ${languageNames[editorLocale]} wording. The two form paths are fixed.` : `Edit the ${languageNames[editorLocale]} text for each choice.`}</p></div>{!editingIsFlowSelector && <button type="button" onClick={() => setEditing({ ...editing, options: [...editing.options, makeOption(editing.options.length + 1)] })}><Plus size={15} /> Add option</button>}</div>
+                  <div className="editor-section-title"><div><h3>Answer options</h3><p>{editingIsFlowSelector ? `Edit the ${languageNames[editorLocale]} wording. Add or remove positions here. Add role-specific questions before publishing.` : `Edit the ${languageNames[editorLocale]} text for each choice.`}</p></div>{<button type="button" onClick={() => setEditing({ ...editing, options: [...editing.options, makeOption(editing.options.length + 1)] })}><Plus size={15} /> Add option</button>}</div>
                   {editing.options.map((option, index) => (
                     <div className="editor-option-row" key={option.id}>
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       <div><input value={option.label[editorLocale]} onChange={(event) => updateOption(index, "label", event.target.value)} placeholder={`${languageNames[editorLocale]} option label`} required={editorLocale === "en"} /><input value={option.description?.[editorLocale] ?? ""} onChange={(event) => updateOption(index, "description", event.target.value)} placeholder="Small explanation (optional)" /></div>
-                      <button type="button" aria-label="Remove option" disabled={editingIsFlowSelector || editing.options.length <= 2} title={editingIsFlowSelector ? "The two form paths cannot be removed" : undefined} onClick={() => setEditing({ ...editing, options: editing.options.filter((_, optionIndex) => optionIndex !== index) })}><Trash2 size={16} /></button>
+                      <button type="button" aria-label="Remove option" disabled={editing.options.length <= 1} title={editingIsFlowSelector ? "Remove a position to close applications for it" : undefined} onClick={() => setEditing({ ...editing, options: editing.options.filter((_, optionIndex) => optionIndex !== index) })}><Trash2 size={16} /></button>
                     </div>
                   ))}
                 </div>

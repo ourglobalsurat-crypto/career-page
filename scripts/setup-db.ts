@@ -32,6 +32,10 @@ const PUBLISHED_VERSION_ID = "22222222-2222-4222-8222-222222222222";
 const DRAFT_VERSION_ID = "33333333-3333-4333-8333-333333333333";
 
 const statements = [
+  `CREATE TABLE IF NOT EXISTS resume_uploads (
+    id uuid PRIMARY KEY, submission_token uuid NOT NULL, filename text NOT NULL,
+    mime_type text NOT NULL, data bytea NOT NULL, created_at timestamptz NOT NULL DEFAULT now()
+  )`,
   `CREATE EXTENSION IF NOT EXISTS pgcrypto`,
   `CREATE TABLE IF NOT EXISTS admin_users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -177,7 +181,7 @@ async function main() {
 
   await sql.query(
     `INSERT INTO forms (id, slug, name, current_published_version_id)
-     VALUES ($1, 'growth-check', 'Global Surat Growth Check', $2)
+     VALUES ($1, 'careers', 'Global Surat Careers', $2)
      ON CONFLICT (slug) DO NOTHING`,
     [FORM_ID, PUBLISHED_VERSION_ID],
   );
@@ -208,7 +212,7 @@ async function main() {
 
   console.log("Neon database is ready.");
   console.log(`Admin account: ${adminEmail}`);
-  console.log(`Seeded ${defaultQuestions.length} editable questions in English, Hindi and Gujarati.`);
+  console.log(`Seeded ${defaultQuestions.length} editable career questions. English content is seeded; translations can be added in admin.`);
 }
 
 main().catch((error) => {

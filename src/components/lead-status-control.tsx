@@ -7,10 +7,10 @@ import { leadStatuses, type LeadStatus } from "@/lib/types";
 
 const labels: Record<LeadStatus, string> = {
   new: "New",
-  contacted: "Contacted",
-  qualified: "Qualified",
-  won: "Won",
-  not_interested: "Not interested",
+  contacted: "Interview",
+  qualified: "Shortlisted",
+  won: "Hired",
+  not_interested: "Archived",
 };
 
 export function LeadStatusControl({ id, initialStatus }: { id: string; initialStatus: LeadStatus }) {

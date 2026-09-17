@@ -21,21 +21,21 @@ export default async function AdminOverviewPage() {
   return (
     <main className="admin-page">
       <div className="admin-page-heading">
-        <div><span className="admin-page-kicker">OVERVIEW</span><h1>Lead pulse</h1><p>A quick view of new enquiries and team follow-up.</p></div>
-        <Link className="admin-button primary" href="/admin/leads">View all leads <ArrowRight size={17} /></Link>
+        <div><span className="admin-page-kicker">OVERVIEW</span><h1>Hiring overview</h1><p>Applications, shortlisted candidates and your hiring activity.</p></div>
+        <Link className="admin-button primary" href="/gsm-admin/leads">View all applications <ArrowRight size={17} /></Link>
       </div>
 
       <section className="admin-stat-grid">
-        <article><span className="stat-icon orange"><Users /></span><div><small>Total leads</small><strong>{data.stats.total}</strong><em>All time</em></div></article>
+        <article><span className="stat-icon orange"><Users /></span><div><small>Total applications</small><strong>{data.stats.total}</strong><em>All time</em></div></article>
         <article><span className="stat-icon lime"><Clock3 /></span><div><small>Last 24 hours</small><strong>{data.stats.today}</strong><em>Fresh enquiries</em></div></article>
         <article><span className="stat-icon blue"><TrendingUp /></span><div><small>Awaiting action</small><strong>{data.stats.newCount}</strong><em>Marked as new</em></div></article>
-        <article><span className="stat-icon dark"><UserRoundCheck /></span><div><small>Qualified / won</small><strong>{data.stats.qualified}</strong><em>Promising leads</em></div></article>
+        <article><span className="stat-icon dark"><UserRoundCheck /></span><div><small>Shortlisted / hired</small><strong>{data.stats.qualified}</strong><em>Candidates progressing</em></div></article>
       </section>
 
       <section className="admin-overview-grid">
         <article className="admin-card chart-card">
-          <header><div><span className="admin-page-kicker">LAST 7 DAYS</span><h2>Lead activity</h2></div><Target size={22} /></header>
-          <div className="bar-chart" aria-label="Lead activity for the last seven days">
+          <header><div><span className="admin-page-kicker">LAST 7 DAYS</span><h2>Application activity</h2></div><Target size={22} /></header>
+          <div className="bar-chart" aria-label="Application activity for the last seven days">
             {data.daily.map((item) => (
               <div key={item.label}><span className="bar-value">{item.count}</span><span className="bar" style={{ height: `${Math.max((item.count / maxDaily) * 100, 5)}%` }} /><small>{item.label}</small></div>
             ))}
@@ -50,13 +50,13 @@ export default async function AdminOverviewPage() {
       </section>
 
       <section className="admin-card recent-leads-card">
-        <header><div><span className="admin-page-kicker">LATEST ENQUIRIES</span><h2>Recent leads</h2></div><Link href="/admin/leads">See all <ArrowRight size={15} /></Link></header>
+        <header><div><span className="admin-page-kicker">LATEST APPLICATIONS</span><h2>Recent applications</h2></div><Link href="/gsm-admin/leads">See all <ArrowRight size={15} /></Link></header>
         <div className="admin-table-wrap">
           <table className="admin-table">
-            <thead><tr><th>Lead</th><th>Contact</th><th>City</th><th>Received</th><th>Status</th><th /></tr></thead>
+            <thead><tr><th>Applicant</th><th>Contact</th><th>City</th><th>Received</th><th>Status</th><th /></tr></thead>
             <tbody>
-              {data.recent.map((lead) => <tr key={lead.id}><td><strong>{lead.name || "Unnamed lead"}</strong><small>{lead.source || "direct"}</small></td><td><strong>{lead.phone || lead.email || "—"}</strong><small>{lead.language.toUpperCase()}</small></td><td>{lead.city || "—"}</td><td>{formatDate(lead.createdAt)}</td><td><LeadStatusControl id={lead.id} initialStatus={lead.status} /></td><td><Link className="table-arrow" href={`/admin/leads/${lead.id}`} aria-label={`View ${lead.name || "lead"}`}><ArrowRight size={16} /></Link></td></tr>)}
-              {!data.recent.length && <tr><td colSpan={6} className="empty-table">No leads yet. New form submissions will appear here.</td></tr>}
+              {data.recent.map((lead) => <tr key={lead.id}><td><strong>{lead.name || "Unnamed applicant"}</strong><small>{lead.source || "direct"}</small></td><td><strong>{lead.phone || lead.email || "—"}</strong><small>{lead.language.toUpperCase()}</small></td><td>{lead.city || "—"}</td><td>{formatDate(lead.createdAt)}</td><td><LeadStatusControl id={lead.id} initialStatus={lead.status} /></td><td><Link className="table-arrow" href={`/gsm-admin/leads/${lead.id}`} aria-label={`View ${lead.name || "lead"}`}><ArrowRight size={16} /></Link></td></tr>)}
+              {!data.recent.length && <tr><td colSpan={6} className="empty-table">No applications yet. New form submissions will appear here.</td></tr>}
             </tbody>
           </table>
         </div>

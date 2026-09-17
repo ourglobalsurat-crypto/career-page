@@ -17,11 +17,7 @@ export function text(value: LocalizedText, locale: Locale) {
 }
 
 export const siteCopy = {
-  navCta: {
-    en: "Get my free plan",
-    hi: "अपना free plan पाएँ",
-    gu: "મારો free plan મેળવો",
-  },
+  navCta: {"en": "Apply now", "hi": "", "gu": ""},
   mainWebsite: {
     en: "Visit our main website",
     hi: "Main website देखें",
@@ -32,79 +28,23 @@ export const siteCopy = {
     hi: "Website",
     gu: "Website",
   },
-  eyebrow: {
-    en: "SURAT-BASED GROWTH TEAM",
-    hi: "सूरत की बिज़नेस ग्रोथ टीम",
-    gu: "બિઝનેસ વધારતી સુરતની ટીમ",
-  },
-  headlineTop: {
-    en: "Want more customers",
-    hi: "अपने बिज़नेस के लिए ज़्यादा",
-    gu: "તમારા બિઝનેસ માટે વધુ",
-  },
-  headlineAccent: {
-    en: "for your business?",
-    hi: "ग्राहक चाहिए?",
-    gu: "ગ્રાહકો જોઈએ છે?",
-  },
-  heroBody: {
-    en: "Tell us what your business needs. We’ll suggest a clear next step for ads, Google visibility, product photos & videos, or an online store.",
-    hi: "बस हमें बताइए कि आपके बिज़नेस को क्या चाहिए। Ads, Google पर पहचान, product photos/videos या online store के लिए हम आसान अगला कदम बताएँगे।",
-    gu: "તમારા બિઝનેસને અત્યારે શાની જરૂર છે તે જણાવો. Ads, Google પર દેખાવ, product photos/videos કે online shop માટે અમે આગળનું સરળ પગલું સૂચવીશું.",
-  },
-  primaryCta: {
-    en: "Start 2-minute check",
-    hi: "2 मिनट की जाँच शुरू करें",
-    gu: "2 મિનિટમાં શરૂ કરો",
-  },
-  whatsappCta: {
-    en: "WhatsApp us",
-    hi: "WhatsApp करें",
-    gu: "WhatsApp કરો",
-  },
-  noJargon: {
-    en: "No confusing jargon",
-    hi: "मुश्किल शब्दों की उलझन नहीं",
-    gu: "મુશ્કેલ technical શબ્દો નહીં",
-  },
-  freeCall: {
-    en: "Free first conversation",
-    hi: "पहली बातचीत free",
-    gu: "પહેલી વાતચીત free",
-  },
-  localTeam: {
-    en: "A real local team",
-    hi: "सूरत की अपनी team",
-    gu: "સુરતની પોતાની ટીમ",
-  },
-  languageAvailability: {
-    en: "available",
-    hi: "में बात कर सकते हैं",
-    gu: "માં વાત કરી શકો છો",
-  },
-  formKicker: {
-    en: "YOUR 2-MINUTE BUSINESS CHECK",
-    hi: "आपके बिज़नेस की 2 मिनट की जाँच",
-    gu: "2 મિનિટમાં તમારા બિઝનેસની માહિતી",
-  },
-  formTitle: {
-    en: "Let’s understand your business.",
-    hi: "आइए, आपके बिज़नेस को समझें।",
-    gu: "ચાલો, તમારા બિઝનેસને સમજીએ.",
-  },
-  formIntro: {
-    en: "One easy question at a time. No technical knowledge needed.",
-    hi: "एक बार में एक आसान सवाल। Technical जानकारी की ज़रूरत नहीं।",
-    gu: "એક સમયે એક સરળ સવાલ. કોઈ technical જાણકારી જરૂરી નથી.",
-  },
+  eyebrow: {"en": "BUILD YOUR CAREER IN SURAT", "hi": "", "gu": ""},
+  headlineTop: {"en": "Do work that matters.", "hi": "", "gu": ""},
+  headlineAccent: {"en": "Grow with us.", "hi": "", "gu": ""},
+  heroBody: {"en": "Join Global Surat’s team of marketers, creators, developers and sales professionals. Bring your experience, your best work and your ambition. Let’s build what’s next, together.", "hi": "", "gu": ""},
+  primaryCta: {"en": "Start your application", "hi": "", "gu": ""},
+  whatsappCta: {"en": "Talk to our team", "hi": "", "gu": ""},
+  noJargon: {"en": "Real work. Real impact.", "hi": "", "gu": ""},
+  freeCall: {"en": "A skills-first process", "hi": "", "gu": ""},
+  localTeam: {"en": "Surat office", "hi": "", "gu": ""},
+  languageAvailability: {"en": "Role-specific questions are in English. Share clear, practical examples.", "hi": "", "gu": ""},
+  formKicker: {"en": "YOUR NEXT CHAPTER STARTS HERE", "hi": "", "gu": ""},
+  formTitle: {"en": "Find your place with us.", "hi": "", "gu": ""},
+  formIntro: {"en": "Choose your position first, then show us your experience. Keep your résumé and work links ready. Allow 10–15 minutes.", "hi": "", "gu": ""},
   start: { en: "Start now", hi: "अभी शुरू करें", gu: "હમણાં શરૂ કરો" },
   back: { en: "Back", hi: "पीछे", gu: "પાછળ" },
   next: { en: "Continue", hi: "आगे बढ़ें", gu: "આગળ વધો" },
-  submit: {
-    en: "Send my details",
-    hi: "मेरी details भेजें",
-    gu: "મારી માહિતી મોકલો",
-  },
+  submit: {"en": "Submit application", "hi": "", "gu": ""},
   saving: { en: "Saving...", hi: "Save हो रहा है...", gu: "Save થઈ રહ્યું છે..." },
   optional: { en: "Optional", hi: "ज़रूरी नहीं", gu: "ફરજિયાત નથી" },
   selectAll: {
@@ -117,32 +57,16 @@ export const siteCopy = {
     hi: "आगे बढ़ने के लिए जवाब चुनें।",
     gu: "આગળ વધવા માટે આ સવાલનો જવાબ આપો.",
   },
-  consent: {
-    en: "I agree that Global Surat may call or WhatsApp me about my enquiry. No spam.",
-    hi: "मैं सहमत हूँ कि Global Surat मेरी enquiry के बारे में मुझसे call या WhatsApp पर संपर्क कर सकता है। कोई spam नहीं।",
-    gu: "મારી enquiry માટે Global Surat મને call અથવા WhatsApp કરે તે માટે હું મંજૂરી આપું છું. કોઈ spam નહીં.",
-  },
+  consent: {"en": "I consent to Global Surat storing my application and résumé for recruitment and contacting me about this application.", "hi": "", "gu": ""},
   consentError: {
     en: "Please allow us to contact you.",
     hi: "कृपया हमें संपर्क करने की अनुमति दें।",
     gu: "કૃપા કરીને અમને સંપર્ક કરવાની મંજૂરી આપો.",
   },
-  successKicker: { en: "DONE / COMPLETE", hi: "पूरा हुआ", gu: "પૂર્ણ થયું" },
-  successTitle: {
-    en: "Thank you — we’ve got it!",
-    hi: "धन्यवाद — आपकी details मिल गईं!",
-    gu: "આભાર — તમારી માહિતી મળી ગઈ!",
-  },
-  successBody: {
-    en: "Our Surat team will review your answers and contact you shortly with a simple next step.",
-    hi: "हमारी सूरत team आपके जवाब देखेगी और आसान अगले कदम के साथ जल्द आपसे संपर्क करेगी।",
-    gu: "અમારી સુરતની ટીમ તમારા જવાબો જોઈને ટૂંક સમયમાં call કરશે અને આગળનું સરળ પગલું સમજાવશે.",
-  },
-  humanFollowUp: {
-    en: "Human follow-up",
-    hi: "Team जल्द संपर्क करेगी",
-    gu: "Team જલ્દી સંપર્ક કરશે",
-  },
+  successKicker: {"en": "APPLICATION RECEIVED", "hi": "", "gu": ""},
+  successTitle: {"en": "Thank you for applying!", "hi": "", "gu": ""},
+  successBody: {"en": "Our hiring team will review your experience and work. If your profile matches the role, we’ll contact you about the next step.", "hi": "", "gu": ""},
+  humanFollowUp: {"en": "Reviewed by our hiring team", "hi": "", "gu": ""},
   detailsPrivate: {
     en: "Your details stay private",
     hi: "आपकी details सुरक्षित रहेंगी",
@@ -168,173 +92,25 @@ export const siteCopy = {
     hi: "आपकी details सुरक्षित हैं। उन्हें कभी बेचा नहीं जाता।",
     gu: "તમારી details સુરક્ષિત છે. તે ક્યારેય વેચાતી નથી.",
   },
-  servicesEyebrow: {
-    en: "WHAT WE CAN HELP WITH",
-    hi: "हम आपकी कैसे मदद कर सकते हैं",
-    gu: "અમે કેવી રીતે મદદ કરી શકીએ",
-  },
-  servicesTitle: {
-    en: "You tell us the problem. We handle the technical part.",
-    hi: "आप अपनी परेशानी बताएँ। Technical काम हम सँभालेंगे।",
-    gu: "તમારે શું જોઈએ છે તે કહો. Technical કામ અમે સંભાળીશું.",
-  },
-  servicesIntro: {
-    en: "Simple outcomes first. The right tools come after we understand your business.",
-    hi: "पहले आसान नतीजे। सही tools हम आपका बिज़नेस समझने के बाद चुनेंगे।",
-    gu: "પહેલા સરળ પરિણામ. સાચા tools અમે તમારો બિઝનેસ સમજ્યા પછી પસંદ કરીશું.",
-  },
-  teamEyebrow: {
-    en: "LOCAL. HUMAN. ACCOUNTABLE.",
-    hi: "LOCAL TEAM. अपनी भाषा. पूरी जिम्मेदारी.",
-    gu: "LOCAL TEAM. આપણી ભાષા. પૂરી જવાબદારી.",
-  },
-  teamTitle: {
-    en: "A team you can actually talk to.",
-    hi: "ऐसी team जो सच में आपकी बात समझे।",
-    gu: "એવી ટીમ, જેની સાથે તમે સીધી વાત કરી શકો.",
-  },
-  teamBody: {
-    en: "We’re based in Surat and work with businesses in clear, everyday language—from the first call to the final launch.",
-    hi: "हम सूरत की team हैं। पहली call से final launch तक आपके साथ आसान भाषा में काम करते हैं।",
-    gu: "અમે સુરતમાં છીએ અને પહેલી callથી કામ પૂરું થાય ત્યાં સુધી તમારી સાથે સરળ ભાષામાં વાત કરીએ છીએ.",
-  },
+  servicesEyebrow: {"en": "FIND YOUR NEXT ROLE", "hi": "", "gu": ""},
+  servicesTitle: {"en": "Different strengths. One ambitious team.", "hi": "", "gu": ""},
+  servicesIntro: {"en": "Explore our open positions below. Choose your role in the application to answer questions specific to your work.", "hi": "", "gu": ""},
+  teamEyebrow: {"en": "MEET YOUR FUTURE TEAM", "hi": "", "gu": ""},
+  teamTitle: {"en": "Good people. Meaningful work.", "hi": "", "gu": ""},
+  teamBody: {"en": "Based in Surat, we work together across strategy, marketing, creative and development. Bring your perspective, take ownership and help our clients move forward.", "hi": "", "gu": ""},
   teamPhotoLabel: { en: "OUR TEAM", hi: "हमारी TEAM", gu: "અમારી TEAM" },
-  processEyebrow: { en: "HOW IT WORKS", hi: "काम कैसे होगा", gu: "કામ કેવી રીતે થશે" },
-  processTitle: {
-    en: "Simple from day one.",
-    hi: "पहले दिन से सब आसान।",
-    gu: "શરૂઆતથી જ સરળ.",
-  },
+  processEyebrow: {"en": "OUR HIRING PROCESS", "hi": "", "gu": ""},
+  processTitle: {"en": "Show us what you can do.", "hi": "", "gu": ""},
   faqEyebrow: { en: "GOOD TO KNOW", hi: "जानना अच्छा है", gu: "જાણવું સારું છે" },
-  faqTitle: {
-    en: "Simple answers before we talk.",
-    hi: "बात करने से पहले आसान जवाब।",
-    gu: "વાત કરતાં પહેલાં સરળ જવાબો.",
-  },
-  finalEyebrow: {
-    en: "NO PRESSURE. JUST A CLEAR NEXT STEP.",
-    hi: "कोई दबाव नहीं। बस साफ़ अगला कदम।",
-    gu: "કોઈ દબાણ નહીં. ફક્ત સ્પષ્ટ આગળનું પગલું.",
-  },
-  finalTitle: {
-    en: "Ready to find your next growth step?",
-    hi: "बिज़नेस बढ़ाने का अगला कदम जानने के लिए तैयार हैं?",
-    gu: "બિઝનેસ વધારવાનું આગળનું પગલું જાણવા તૈયાર છો?",
-  },
-  footerBody: {
-    en: "Simple growth support for ambitious businesses.",
-    hi: "आगे बढ़ना चाहने वाले बिज़नेस के लिए आसान growth support.",
-    gu: "આગળ વધવા માંગતા બિઝનેસ માટે સરળ growth support.",
-  },
+  faqTitle: {"en": "Before you apply.", "hi": "", "gu": ""},
+  finalEyebrow: {"en": "YOUR EXPERIENCE. YOUR IDEAS. YOUR NEXT STEP.", "hi": "", "gu": ""},
+  finalTitle: {"en": "Ready to build your next chapter?", "hi": "", "gu": ""},
+  footerBody: {"en": "Careers at Global Surat · Surat, Gujarat.", "hi": "", "gu": ""},
 } satisfies Record<string, LocalizedText>;
 
-export const marqueeItems = [
-  { en: "MORE ENQUIRIES", hi: "ज़्यादा ENQUIRIES", gu: "વધુ ENQUIRIES" },
-  { en: "ONLINE SALES", hi: "ज़्यादा ONLINE SALES", gu: "વધુ ONLINE SALES" },
-  { en: "BETTER CREATIVE", hi: "बेहतर CREATIVE", gu: "વધુ સારું CREATIVE" },
-  { en: "SHOPIFY STORES", hi: "SHOPIFY STORE", gu: "SHOPIFY STORE" },
-  { en: "GOOGLE VISIBILITY", hi: "GOOGLE पर पहचान", gu: "GOOGLE પર ઓળખ" },
-] satisfies LocalizedText[];
-
-export const services = [
-  {
-    number: "01",
-    title: {
-      en: "Get more calls & enquiries",
-      hi: "ज़्यादा calls और enquiries पाएँ",
-      gu: "વધુ calls અને enquiries મેળવો",
-    },
-    body: {
-      en: "We show clear Facebook and Instagram ads to people most likely to contact you.",
-      hi: "हम Facebook और Instagram पर सही लोगों को Ads दिखाकर calls और WhatsApp enquiries बढ़ाते हैं।",
-      gu: "Facebook અને Instagram પર યોગ્ય લોકોને Ads બતાવી વધુ calls અને WhatsApp enquiries મેળવવામાં મદદ કરીએ છીએ.",
-    },
-    technical: "Lead generation · Meta ads",
-  },
-  {
-    number: "02",
-    title: {
-      en: "Sell more products online",
-      hi: "Online ज़्यादा products बेचें",
-      gu: "Online વધુ products વેચો",
-    },
-    body: {
-      en: "We improve your ads and online-shop journey so more visitors become buyers.",
-      hi: "हम Ads और online shop को बेहतर बनाते हैं, ताकि ज़्यादा visitors ग्राहक बनें।",
-      gu: "અમે તમારા Ads અને online shopમાં ખરીદી કરવાની રીત સરળ બનાવીએ છીએ, જેથી વધુ લોકો ખરીદી કરે.",
-    },
-    technical: "D2C performance marketing",
-  },
-  {
-    number: "03",
-    title: {
-      en: "Make products look premium",
-      hi: "अपने products को premium दिखाएँ",
-      gu: "Products ને premium દેખાડો",
-    },
-    body: {
-      en: "Social posts, product-page photos, UGC-style videos and product showcase videos.",
-      hi: "हम social posts, product-page photos, UGC-style videos और product showcase videos बनाते हैं।",
-      gu: "Social media posts, product-page photos, UGC videos અને product showcase videos બનાવીએ છીએ.",
-    },
-    technical: "AI creative production",
-  },
-  {
-    number: "04",
-    title: {
-      en: "Open or improve your online shop",
-      hi: "Online shop बनाएँ या बेहतर करें",
-      gu: "Online shop બનાવો અથવા સુધારો",
-    },
-    body: {
-      en: "A fast, easy-to-use Shopify store that helps customers buy without confusion.",
-      hi: "तेज़ और आसान Shopify store, जहाँ ग्राहक बिना उलझन के खरीदारी कर सकें।",
-      gu: "ઝડપી અને સરળ Shopify Website, જ્યાં ગ્રાહક ગૂંચવાયા વગર ખરીદી કરી શકે.",
-    },
-    technical: "Shopify web development",
-  },
-  {
-    number: "05",
-    title: {
-      en: "Show up higher on Google",
-      hi: "Google पर ऊपर दिखें",
-      gu: "Google પર ઉપર દેખાઓ",
-    },
-    body: {
-      en: "We make it easier for nearby and relevant customers to find your business.",
-      hi: "हम आपके बिज़नेस को आस-पास के सही ग्राहकों के लिए ढूँढना आसान बनाते हैं।",
-      gu: "નજીકના યોગ્ય ગ્રાહકો Google પર તમારો બિઝનેસ સરળતાથી શોધી શકે તે માટે મદદ કરીએ છીએ.",
-    },
-    technical: "SEO",
-  },
-] as const;
-
+export const marqueeItems = ['MARKETING', 'CREATIVE', 'DEVELOPMENT', 'SALES', 'YOUR NEXT CHAPTER'].map(en => ({en, hi:'', gu:''}));
 export const processSteps = [
-  {
-    number: "01",
-    title: { en: "Tell us", hi: "हमें बताएँ", gu: "અમને જણાવો" },
-    body: {
-      en: "Answer a few easy questions about your business.",
-      hi: "अपने बिज़नेस के बारे में कुछ आसान सवालों के जवाब दें।",
-      gu: "તમારા બિઝનેસ વિશે થોડા સરળ સવાલોના જવાબ આપો.",
-    },
-  },
-  {
-    number: "02",
-    title: { en: "We review", hi: "हम समझेंगे", gu: "અમે સમજશું" },
-    body: {
-      en: "A real strategist looks at your needs—not a bot.",
-      hi: "हमारी team आपकी ज़रूरत समझेगी, कोई bot नहीं।",
-      gu: "અમારી ટીમ જાતે તમારા જવાબો જોશે — કોઈ bot નહીં.",
-    },
-  },
-  {
-    number: "03",
-    title: { en: "Clear next step", hi: "साफ़ अगला कदम", gu: "આગળનું સ્પષ્ટ પગલું" },
-    body: {
-      en: "We call with a practical suggestion and no pressure.",
-      hi: "हम उपयोगी सुझाव के साथ call करेंगे — कोई दबाव नहीं।",
-      gu: "અમે ઉપયોગી સલાહ સાથે call કરીશું — કોઈ દબાણ નહીં.",
-    },
-  },
-] as const;
+ {number:'01',title:{en:'Tell us about you',hi:'',gu:''},body:{en:'Choose a position and share your experience, practical answers and résumé.',hi:'',gu:''}},
+ {number:'02',title:{en:'We review your work',hi:'',gu:''},body:{en:'Our hiring team reviews your answers, results and portfolio for the role.',hi:'',gu:''}},
+ {number:'03',title:{en:'Let’s meet',hi:'',gu:''},body:{en:'If there is a fit, we contact you about an interview and the next steps.',hi:'',gu:''}},
+];

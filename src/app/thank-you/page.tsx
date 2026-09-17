@@ -10,8 +10,8 @@ import type { Locale, LocalizedText } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Details Received",
-  description: "Your business details have been received by the Global Surat growth team.",
+  title: "Application Received",
+  description: "Your application has been received by the Global Surat hiring team.",
   robots: {
     index: false,
     follow: false,
@@ -19,43 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-const copy = {
-  eyebrow: {
-    en: "DETAILS RECEIVED",
-    hi: "जानकारी मिल गई",
-    gu: "માહિતી મળી ગઈ",
-  },
-  heading: {
-    en: "Your Details Have Been Received!",
-    hi: "आपकी जानकारी मिल गई है!",
-    gu: "તમારી માહિતી અમને મળી ગઈ છે!",
-  },
-  body: {
-    en: "Our growth team will review your business details. For a faster discussion, connect with us directly on WhatsApp.",
-    hi: "हमारी growth team आपके बिज़नेस की जानकारी देखेगी। जल्दी बात करने के लिए हमसे सीधे WhatsApp पर जुड़ें।",
-    gu: "અમારી growth team તમારા બિઝનેસની માહિતી જોશે. ઝડપથી ચર્ચા કરવા માટે અમારી સાથે સીધા WhatsApp પર જોડાઓ.",
-  },
-  button: {
-    en: "Discuss My Growth Plan on WhatsApp",
-    hi: "WhatsApp पर मेरे Growth Plan पर बात करें",
-    gu: "WhatsApp પર મારા Growth Plan વિશે વાત કરો",
-  },
-  privacy: {
-    en: "Your details remain private with our team.",
-    hi: "आपकी जानकारी हमारी team के पास सुरक्षित रहेगी।",
-    gu: "તમારી માહિતી અમારી team પાસે સુરક્ષિત રહેશે.",
-  },
-  website: {
-    en: "Visit Global Surat",
-    hi: "Global Surat website देखें",
-    gu: "Global Surat website જુઓ",
-  },
-  whatsappMessage: {
-    en: "Hi Global Surat, I have submitted my details and would like to discuss my growth plan.",
-    hi: "नमस्ते Global Surat, मैंने अपनी जानकारी भेज दी है और अपने growth plan के बारे में बात करना चाहता/चाहती हूँ।",
-    gu: "નમસ્તે Global Surat, મેં મારી માહિતી મોકલી છે અને મારા growth plan વિશે વાત કરવા માંગું છું.",
-  },
-} satisfies Record<string, LocalizedText>;
+const copy = {"eyebrow": {"en": "APPLICATION RECEIVED", "hi": "", "gu": ""}, "heading": {"en": "Thank you for applying!", "hi": "", "gu": ""}, "body": {"en": "Our hiring team will review your experience, answers and résumé. If your profile matches the role, we will contact you about the next step.", "hi": "", "gu": ""}, "button": {"en": "Contact our team on WhatsApp", "hi": "", "gu": ""}, "privacy": {"en": "Your application is private with our hiring team.", "hi": "", "gu": ""}, "website": {"en": "Visit Global Surat", "hi": "", "gu": ""}, "whatsappMessage": {"en": "Hi Global Surat, I have submitted my career application and have a question about the hiring process.", "hi": "", "gu": ""}} satisfies Record<string, LocalizedText>;
 
 function localized(value: LocalizedText, locale: Locale) {
   return value[locale] || value.en;
